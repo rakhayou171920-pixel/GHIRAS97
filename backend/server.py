@@ -136,37 +136,6 @@ async def mark_attendance(student_id: str):
     
     return student
 
-@api_router.put("/students/{student_id}/notebook")
-async def mark_notebook(student_id: str):
-    """تسجيل الدفتر - إضافة 120 نقطة (مرة واحدة فقط)"""
-    # First check if notebook is already completed
-    student = await db.students.find_one({"id": student_id}, {"_id": 0})
-    
-    if not student:
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
-    
-    if student.get('notebook', 0) == 1:
-        raise HTTPException(status_code=400, detail="الدفتر منجز مسبقاً")
-    
-    # Update: add 120 points and mark notebook as completed
-    result = await db.students.update_one(
-        {"id": student_id, "notebook": 0},
-        {
-            "$inc": {"points": 120},
-            "$set": {"notebook": 1}
-        }
-    )
-    
-    if result.modified_count == 0:
-        raise HTTPException(status_code=400, detail="لا يمكن تحديث الدفتر")
-    
-    # Get updated student
-    updated_student = await db.students.find_one({"id": student_id}, {"_id": 0})
-    if updated_student and isinstance(updated_student.get('created_at'), str):
-        updated_student['created_at'] = datetime.fromisoformat(updated_student['created_at'])
-    
-    return updated_student
-
 @api_router.put("/students/{student_id}", response_model=Student)
 async def update_student(student_id: str, update_data: StudentUpdate):
     """تحديث معلومات الطالب"""
