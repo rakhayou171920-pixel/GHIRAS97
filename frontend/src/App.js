@@ -850,6 +850,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/student/:studentId" element={<StudentProfile />} />
           <Route path="/public/:studentId" element={<StudentProfilePublic />} />
+          <Route path="/challenges" element={<ChallengesManager />} />
         </Routes>
       </BrowserRouter>
     </div>
