@@ -161,14 +161,15 @@ function StudentProfile() {
 // Main Dashboard Component
 function Dashboard() {
   const [students, setStudents] = useState([]);
-  const [newStudentName, setNewStudentName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCustomPointsModal, setShowCustomPointsModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", phone: "", group_name: "", image_url: "" });
-  const [addForm, setAddForm] = useState({ name: "", phone: "", group_name: "", image_url: "" });
+  const [customPoints, setCustomPoints] = useState({ points: 0, reason: "" });
+  const [editForm, setEditForm] = useState({ name: "", phone: "", group_name: "", image_file: null });
+  const [addForm, setAddForm] = useState({ name: "", phone: "", group_name: "", image_file: null });
 
   // Fetch students
   const fetchStudents = async () => {
@@ -193,8 +194,26 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      await axios.post(`${API}/students`, addForm);
-      setAddForm({ name: "", phone: "", group_name: "", image_url: "" });
+      const studentData = {
+        name: addForm.name,
+        phone: addForm.phone || null,
+        group_name: addForm.group_name || null,
+        image_url: null
+      };
+      
+      const response = await axios.post(`${API}/students`, studentData);
+      const newStudent = response.data;
+      
+      // Upload image if selected
+      if (addForm.image_file) {
+        const formData = new FormData();
+        formData.append('file', addForm.image_file);
+        await axios.post(`${API}/students/${newStudent.id}/upload-image`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+      
+      setAddForm({ name: "", phone: "", group_name: "", image_file: null });
       setShowAddModal(false);
       showMessage("تمت إضافة الطالب بنجاح! 🎉");
       await fetchStudents();
@@ -213,7 +232,23 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      await axios.put(`${API}/students/${selectedStudent.id}`, editForm);
+      const updateData = {
+        name: editForm.name,
+        phone: editForm.phone || null,
+        group_name: editForm.group_name || null
+      };
+      
+      await axios.put(`${API}/students/${selectedStudent.id}`, updateData);
+      
+      // Upload image if selected
+      if (editForm.image_file) {
+        const formData = new FormData();
+        formData.append('file', editForm.image_file);
+        await axios.post(`${API}/students/${selectedStudent.id}/upload-image`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+      
       setShowEditModal(false);
       setSelectedStudent(null);
       showMessage("تم تحديث بيانات الطالب بنجاح! ✅");
@@ -259,6 +294,17 @@ function Dashboard() {
     }
   };
 
+  // Custom points
+  const applyCustomPoints = async (e) => {
+    e.preventDefault();
+    if (!selectedStudent || !customPoints.reason.trim()) return;
+    
+    await updatePoints(selectedStudent.id, parseInt(customPoints.points), customPoints.reason);
+    setShowCustomPointsModal(false);
+    setCustomPoints({ points: 0, reason: "" });
+    setSelectedStudent(null);
+  };
+
   // Mark attendance
   const markAttendance = async (studentId) => {
     setLoading(true);
@@ -299,9 +345,15 @@ function Dashboard() {
       name: student.name,
       phone: student.phone || "",
       group_name: student.group_name || "",
-      image_url: student.image_url || ""
+      image_file: null
     });
     setShowEditModal(true);
+  };
+
+  const openCustomPointsModal = (student) => {
+    setSelectedStudent(student);
+    setCustomPoints({ points: 0, reason: "" });
+    setShowCustomPointsModal(true);
   };
 
   useEffect(() => {
@@ -420,7 +472,7 @@ function Dashboard() {
                               className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all shadow hover:shadow-lg"
                               data-testid={`positive-points-button-${student.id}`}
                             >
-                              ➕ نقاط
+                              ⊕ نقاط
                             </button>
                             <div className="hidden group-hover:block absolute z-10 bg-white rounded-lg shadow-xl border mt-1 w-48">
                               <button
@@ -468,18 +520,56 @@ function Dashboard() {
                               className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all shadow hover:shadow-lg"
                               data-testid={`negative-points-button-${student.id}`}
                             >
-                              ➖ خصم
+                              ⊖ خصم
                             </button>
-                            <div className="hidden group-hover:block absolute z-10 bg-white rounded-lg shadow-xl border mt-1 w-48">
+                            <div className="hidden group-hover:block absolute z-10 bg-white rounded-lg shadow-xl border mt-1 w-56">
                               <button
-                                onClick={() => updatePoints(student.id, -10, "أفعال سلبية")}
+                                onClick={() => updatePoints(student.id, -5, "تأخير")}
+                                className="block w-full text-right px-4 py-2 hover:bg-red-50 text-sm"
+                                data-testid={`late-action-${student.id}`}
+                              >
+                                تأخير (-5)
+                              </button>
+                              <button
+                                onClick={() => updatePoints(student.id, -40, "غياب")}
+                                className="block w-full text-right px-4 py-2 hover:bg-red-50 text-sm"
+                                data-testid={`absence-action-${student.id}`}
+                              >
+                                غياب (-40)
+                              </button>
+                              <button
+                                onClick={() => updatePoints(student.id, -40, "التلفظ")}
+                                className="block w-full text-right px-4 py-2 hover:bg-red-50 text-sm"
+                                data-testid={`verbal-action-${student.id}`}
+                              >
+                                التلفظ (-40)
+                              </button>
+                              <button
+                                onClick={() => updatePoints(student.id, -15, "عدم إحضار الدفتر")}
+                                className="block w-full text-right px-4 py-2 hover:bg-red-50 text-sm"
+                                data-testid={`no-notebook-action-${student.id}`}
+                              >
+                                عدم إحضار الدفتر (-15)
+                              </button>
+                              <button
+                                onClick={() => updatePoints(student.id, -10, "أفعال سلبية أخرى")}
                                 className="block w-full text-right px-4 py-2 hover:bg-red-50 text-sm"
                                 data-testid={`negative-action-${student.id}`}
                               >
-                                أفعال سلبية (-10)
+                                أفعال سلبية أخرى (-10)
                               </button>
                             </div>
                           </div>
+
+                          {/* Custom points button */}
+                          <button
+                            onClick={() => openCustomPointsModal(student)}
+                            className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg font-semibold text-xs transition-all shadow hover:shadow-lg"
+                            data-testid={`custom-points-button-${student.id}`}
+                            title="نقاط مخصصة"
+                          >
+                            ✏️
+                          </button>
 
                           {/* Settings button */}
                           <button
@@ -576,15 +666,17 @@ function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">رابط الصورة</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">صورة الطالب</label>
                   <input
-                    type="url"
-                    value={addForm.image_url}
-                    onChange={(e) => setAddForm({ ...addForm, image_url: e.target.value })}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setAddForm({ ...addForm, image_file: e.target.files[0] })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
-                    placeholder="https://..."
                     data-testid="add-image-input"
                   />
+                  {addForm.image_file && (
+                    <p className="text-sm text-green-600 mt-1">تم اختيار: {addForm.image_file.name}</p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -652,15 +744,17 @@ function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">رابط الصورة</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">تغيير الصورة</label>
                   <input
-                    type="url"
-                    value={editForm.image_url}
-                    onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setEditForm({ ...editForm, image_file: e.target.files[0] })}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
-                    placeholder="https://..."
                     data-testid="edit-image-input"
                   />
+                  {editForm.image_file && (
+                    <p className="text-sm text-green-600 mt-1">تم اختيار: {editForm.image_file.name}</p>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
@@ -677,6 +771,63 @@ function Dashboard() {
                   onClick={() => setShowEditModal(false)}
                   className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all"
                   data-testid="edit-cancel-button"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Points Modal */}
+      {showCustomPointsModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="custom-points-modal">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">✏️ نقاط مخصصة</h3>
+            <p className="text-gray-600 mb-4">الطالب: <span className="font-bold">{selectedStudent.name}</span></p>
+            <form onSubmit={applyCustomPoints}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">عدد النقاط *</label>
+                  <input
+                    type="number"
+                    value={customPoints.points}
+                    onChange={(e) => setCustomPoints({ ...customPoints, points: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    placeholder="أدخل عدد النقاط (موجب أو سالب)"
+                    required
+                    data-testid="custom-points-input"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">مثال: 50 أو -25</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">السبب *</label>
+                  <input
+                    type="text"
+                    value={customPoints.reason}
+                    onChange={(e) => setCustomPoints({ ...customPoints, reason: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    placeholder="مثال: فوز في مسابقة"
+                    required
+                    data-testid="custom-reason-input"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all disabled:opacity-50"
+                  data-testid="custom-points-submit-button"
+                >
+                  {loading ? "جاري التطبيق..." : "تطبيق"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomPointsModal(false)}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all"
+                  data-testid="custom-points-cancel-button"
                 >
                   إلغاء
                 </button>
