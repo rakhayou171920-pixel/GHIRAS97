@@ -34,16 +34,35 @@ class Student(BaseModel):
     name: str
     points: int = 0
     notebook: int = 0  # 0 = not completed, 1 = completed
+    phone: Optional[str] = None  # رقم جوال ولي الأمر
+    group_name: Optional[str] = None  # اسم المجموعة
+    image_url: Optional[str] = None  # صورة الطالب
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class StudentCreate(BaseModel):
     name: str
+    phone: Optional[str] = None
+    group_name: Optional[str] = None
+    image_url: Optional[str] = None
+
+class StudentUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    group_name: Optional[str] = None
+    image_url: Optional[str] = None
+
+class PointsUpdate(BaseModel):
+    points: int  # يمكن أن يكون موجب أو سالب
+    reason: str  # السبب
 
 class StudentResponse(BaseModel):
     id: str
     name: str
     points: int
     notebook: int
+    phone: Optional[str] = None
+    group_name: Optional[str] = None
+    image_url: Optional[str] = None
     created_at: datetime
 
 # Routes for Ghiras Club App
