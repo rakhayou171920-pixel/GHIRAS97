@@ -40,6 +40,22 @@ class Student(BaseModel):
     image_url: Optional[str] = None  # صورة الطالب
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Group(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    supervisor: Optional[str] = None  # اسم المشرف
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GroupCreate(BaseModel):
+    name: str
+    supervisor: Optional[str] = None
+
+class GroupUpdate(BaseModel):
+    name: Optional[str] = None
+    supervisor: Optional[str] = None
+
 class StudentCreate(BaseModel):
     name: str
     phone: Optional[str] = None
