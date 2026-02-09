@@ -245,56 +245,105 @@ async def upload_student_image(student_id: str, file: UploadFile = File(...)):
     
     return {"image_url": image_url, "message": "تم رفع الصورة بنجاح"}
 
-# Group APIs
-@api_router.post("/groups", response_model=Group)
-async def create_group(input: GroupCreate):
-    """إنشاء مجموعة جديدة"""
-    group = Group(**input.model_dump())
-    doc = group.model_dump()
+# Challenge APIs
+@api_router.post("/challenges", response_model=Challenge)
+async def create_challenge(input: ChallengeCreate):
+    """إنشاء منافسة جديدة"""
+    challenge = Challenge(**input.model_dump())
+    doc = challenge.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
-    await db.groups.insert_one(doc)
-    return group
+    await db.challenges.insert_one(doc)
+    return challenge
 
-@api_router.get("/groups", response_model=List[Group])
-async def get_groups():
-    """جلب كل المجموعات"""
-    groups = await db.groups.find({}, {"_id": 0}).to_list(1000)
-    for group in groups:
-        if isinstance(group.get('created_at'), str):
-            group['created_at'] = datetime.fromisoformat(group['created_at'])
-    return groups
+@api_router.get("/challenges", response_model=List[Challenge])
+async def get_challenges():
+    """جلب كل المنافسات"""
+    challenges = await db.challenges.find({}, {"_id": 0}).to_list(1000)
+    for challenge in challenges:
+        if isinstance(challenge.get('created_at'), str):
+            challenge['created_at'] = datetime.fromisoformat(challenge['created_at'])
+    return challenges
 
-@api_router.put("/groups/{group_id}", response_model=Group)
-async def update_group(group_id: str, update_data: GroupUpdate):
-    """تحديث معلومات المجموعة"""
-    update_fields = {k: v for k, v in update_data.model_dump().items() if v is not None}
+@api_router.get("/challenges/active", response_model=List[Challenge])
+async def get_active_challenges():
+    """جلب المنافسات الفعالة فقط"""
+    challenges = await db.challenges.find({"active": True}, {"_id": 0}).to_list(1000)
+    for challenge in challenges:
+        if isinstance(challenge.get('created_at'), str):
+            challenge['created_at'] = datetime.fromisoformat(challenge['created_at'])
+    return challenges
+
+@api_router.post("/challenges/{challenge_id}/answer/{student_id}")
+async def answer_challenge(challenge_id: str, student_id: str, answer: ChallengeAnswer):
+    """إجابة الطالب على منافسة"""
+    # Get challenge
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="المنافسة غير موجودة")
     
-    if not update_fields:
-        raise HTTPException(status_code=400, detail="لا توجد بيانات للتحديث")
+    # Get student
+    student = await db.students.find_one({"id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
     
-    result = await db.groups.update_one(
-        {"id": group_id},
-        {"$set": update_fields}
+    # Check if already answered
+    if challenge_id in student.get('answered_challenges', []):
+        raise HTTPException(status_code=400, detail="تمت الإجابة على هذه المنافسة مسبقاً")
+    
+    # Check answer
+    is_correct = answer.answer == challenge['correct_answer']
+    
+    # Add to answered list
+    await db.students.update_one(
+        {"id": student_id},
+        {"$push": {"answered_challenges": challenge_id}}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+    # If correct, add points
+    if is_correct:
+        await db.students.update_one(
+            {"id": student_id},
+            {"$inc": {"points": challenge['points']}}
+        )
     
-    updated_group = await db.groups.find_one({"id": group_id}, {"_id": 0})
-    if updated_group and isinstance(updated_group.get('created_at'), str):
-        updated_group['created_at'] = datetime.fromisoformat(updated_group['created_at'])
-    
-    return updated_group
+    return {
+        "correct": is_correct,
+        "points_earned": challenge['points'] if is_correct else 0,
+        "correct_answer": challenge['correct_answer'] if not is_correct else None
+    }
 
-@api_router.delete("/groups/{group_id}")
-async def delete_group(group_id: str):
-    """حذف مجموعة"""
-    result = await db.groups.delete_one({"id": group_id})
+@api_router.delete("/challenges/{challenge_id}")
+async def delete_challenge(challenge_id: str):
+    """حذف منافسة"""
+    result = await db.challenges.delete_one({"id": challenge_id})
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+        raise HTTPException(status_code=404, detail="المنافسة غير موجودة")
     
-    return {"message": "تم حذف المجموعة بنجاح", "deleted": True}
+    return {"message": "تم حذف المنافسة بنجاح", "deleted": True}
+
+@api_router.put("/challenges/{challenge_id}/toggle")
+async def toggle_challenge(challenge_id: str):
+    """تفعيل/إيقاف منافسة"""
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="المنافسة غير موجودة")
+    
+    new_status = not challenge.get('active', True)
+    await db.challenges.update_one(
+        {"id": challenge_id},
+        {"$set": {"active": new_status}}
+    )
+    
+    return {"active": new_status}
+
+# Get supervisors list
+@api_router.get("/supervisors")
+async def get_supervisors():
+    """جلب قائمة المشرفين"""
+    students = await db.students.find({}, {"_id": 0, "supervisor": 1}).to_list(1000)
+    supervisors = list(set([s['supervisor'] for s in students if s.get('supervisor')]))
+    return supervisors
 
 # Include the router in the main app
 app.include_router(api_router)
