@@ -127,7 +127,7 @@ function StudentProfilePublic() {
 
   const { student, rank, total_students } = profileData;
   const availableChallenges = challenges.filter(
-    (c) => !student.answered_challenges.includes(c.id)
+    (c) => !(student.answered_challenges || []).includes(c.id)
   );
 
   return (
