@@ -20,6 +20,7 @@ function App() {
 
 export default App;
 
+
 // Student Profile Page Component
 function StudentProfile() {
   const { studentId } = useParams();
