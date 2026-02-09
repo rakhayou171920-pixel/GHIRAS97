@@ -80,10 +80,10 @@ class StudentResponse(BaseModel):
     id: str
     name: str
     points: int
-    notebook: int
     phone: Optional[str] = None
-    group_name: Optional[str] = None
+    supervisor: Optional[str] = None
     image_url: Optional[str] = None
+    answered_challenges: List[str] = []
     created_at: datetime
 
 # Routes for Ghiras Club App
