@@ -73,7 +73,7 @@ async def root():
 @api_router.post("/students", response_model=Student)
 async def add_student(input: StudentCreate):
     """إضافة طالب جديد"""
-    student = Student(name=input.name)
+    student = Student(**input.model_dump())
     
     # Convert to dict and serialize datetime
     doc = student.model_dump()
