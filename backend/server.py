@@ -272,6 +272,57 @@ async def upload_student_image(student_id: str, file: UploadFile = File(...)):
     
     return {"image_url": image_url, "message": "تم رفع الصورة بنجاح"}
 
+# Group APIs
+@api_router.post("/groups", response_model=Group)
+async def create_group(input: GroupCreate):
+    """إنشاء مجموعة جديدة"""
+    group = Group(**input.model_dump())
+    doc = group.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.groups.insert_one(doc)
+    return group
+
+@api_router.get("/groups", response_model=List[Group])
+async def get_groups():
+    """جلب كل المجموعات"""
+    groups = await db.groups.find({}, {"_id": 0}).to_list(1000)
+    for group in groups:
+        if isinstance(group.get('created_at'), str):
+            group['created_at'] = datetime.fromisoformat(group['created_at'])
+    return groups
+
+@api_router.put("/groups/{group_id}", response_model=Group)
+async def update_group(group_id: str, update_data: GroupUpdate):
+    """تحديث معلومات المجموعة"""
+    update_fields = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="لا توجد بيانات للتحديث")
+    
+    result = await db.groups.update_one(
+        {"id": group_id},
+        {"$set": update_fields}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+    
+    updated_group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if updated_group and isinstance(updated_group.get('created_at'), str):
+        updated_group['created_at'] = datetime.fromisoformat(updated_group['created_at'])
+    
+    return updated_group
+
+@api_router.delete("/groups/{group_id}")
+async def delete_group(group_id: str):
+    """حذف مجموعة"""
+    result = await db.groups.delete_one({"id": group_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+    
+    return {"message": "تم حذف المجموعة بنجاح", "deleted": True}
+
 # Include the router in the main app
 app.include_router(api_router)
 
