@@ -224,6 +224,38 @@ async def get_student_profile(student_id: str):
         "total_students": len(all_students)
     }
 
+@api_router.post("/students/{student_id}/upload-image")
+async def upload_student_image(student_id: str, file: UploadFile = File(...)):
+    """رفع صورة الطالب"""
+    # Check if student exists
+    student = await db.students.find_one({"id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+    
+    # Read file and convert to base64
+    contents = await file.read()
+    base64_image = base64.b64encode(contents).decode('utf-8')
+    
+    # Create data URL
+    file_extension = file.filename.split('.')[-1].lower()
+    mime_types = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+    }
+    mime_type = mime_types.get(file_extension, 'image/jpeg')
+    image_url = f"data:{mime_type};base64,{base64_image}"
+    
+    # Update student with image
+    await db.students.update_one(
+        {"id": student_id},
+        {"$set": {"image_url": image_url}}
+    )
+    
+    return {"image_url": image_url, "message": "تم رفع الصورة بنجاح"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
