@@ -228,6 +228,7 @@ function Dashboard() {
 
   useEffect(() => {
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Group students by supervisor
