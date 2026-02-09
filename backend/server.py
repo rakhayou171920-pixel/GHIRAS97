@@ -34,38 +34,42 @@ class Student(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     points: int = 0
-    notebook: int = 0  # 0 = not completed, 1 = completed
     phone: Optional[str] = None  # رقم جوال ولي الأمر
-    group_name: Optional[str] = None  # اسم المجموعة
+    supervisor: Optional[str] = None  # اسم المشرف
     image_url: Optional[str] = None  # صورة الطالب
+    answered_challenges: List[str] = []  # IDs of answered challenges
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class Group(BaseModel):
+class Challenge(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    supervisor: Optional[str] = None  # اسم المشرف
+    question: str  # السؤال
+    options: List[str]  # الخيارات
+    correct_answer: int  # رقم الإجابة الصحيحة (0-based index)
+    points: int  # النقاط المستحقة
+    active: bool = True  # فعالة أم لا
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class GroupCreate(BaseModel):
-    name: str
-    supervisor: Optional[str] = None
+class ChallengeCreate(BaseModel):
+    question: str
+    options: List[str]
+    correct_answer: int
+    points: int
 
-class GroupUpdate(BaseModel):
-    name: Optional[str] = None
-    supervisor: Optional[str] = None
+class ChallengeAnswer(BaseModel):
+    answer: int  # رقم الإجابة المختارة
 
 class StudentCreate(BaseModel):
     name: str
     phone: Optional[str] = None
-    group_name: Optional[str] = None
+    supervisor: Optional[str] = None
     image_url: Optional[str] = None
 
 class StudentUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
-    group_name: Optional[str] = None
+    supervisor: Optional[str] = None
     image_url: Optional[str] = None
 
 class PointsUpdate(BaseModel):
