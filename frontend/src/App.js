@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "@/App.css";
 import axios from "axios";
 import { BrowserRouter, Routes, Route, useParams, Link } from "react-router-dom";
+import StudentProfilePublic from "@/components/StudentProfilePublic";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
