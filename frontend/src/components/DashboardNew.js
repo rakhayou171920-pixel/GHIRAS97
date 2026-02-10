@@ -465,9 +465,15 @@ function Dashboard({ onLogout }) {
                       </Link>
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-wrap">
-                    <button onClick={() => openEditModal(student)} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">تعديل</button>
-                    <button onClick={() => deleteStudent(student.id)} className="flex-1 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">حذف</button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => openPointsModal(student)} 
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                    >
+                      تعديل النقاط
+                    </button>
+                    <button onClick={() => openEditModal(student)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">⚙️</button>
+                    <button onClick={() => deleteStudent(student.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm">🗑️</button>
                   </div>
                 </div>
               ))}
