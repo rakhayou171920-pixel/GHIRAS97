@@ -317,7 +317,7 @@ async def upload_student_image(student_id: str, file: UploadFile = File(...), _:
 
 # Challenge APIs
 @api_router.post("/challenges", response_model=Challenge)
-async def create_challenge(input: ChallengeCreate):
+async def create_challenge(input: ChallengeCreate, _: str = Depends(verify_token)):
     """إنشاء منافسة جديدة"""
     challenge = Challenge(**input.model_dump())
     doc = challenge.model_dump()
