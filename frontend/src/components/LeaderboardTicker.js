@@ -1,15 +1,59 @@
-import { useEffect, useRef } from "react";
+import { useRef, useState } from "react";
 
 function LeaderboardTicker({ students }) {
   const tickerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   
   // Sort students by points descending
   const sortedStudents = [...students].sort((a, b) => b.points - a.points);
   const top3 = sortedStudents.slice(0, 3);
   const restStudents = sortedStudents.slice(3);
 
-  // Duplicate for seamless loop
-  const tickerStudents = [...restStudents, ...restStudents];
+  // Mouse/Touch handlers for dragging
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - tickerRef.current.offsetLeft);
+    setScrollLeft(tickerRef.current.scrollLeft);
+    tickerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (tickerRef.current) {
+      tickerRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - tickerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    tickerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - tickerRef.current.offsetLeft);
+    setScrollLeft(tickerRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - tickerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    tickerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  // Get rank badge style
+  const getRankStyle = (rank) => {
+    if (rank <= 5) return "bg-gradient-to-r from-yellow-400 to-orange-400 text-white";
+    if (rank <= 10) return "bg-gradient-to-r from-blue-400 to-cyan-400 text-white";
+    if (rank <= 15) return "bg-gradient-to-r from-purple-400 to-pink-400 text-white";
+    return "bg-gradient-to-r from-gray-400 to-gray-500 text-white";
+  };
 
   if (students.length === 0) return null;
 
@@ -113,59 +157,75 @@ function LeaderboardTicker({ students }) {
         </div>
       </div>
 
-      {/* Scrolling Ticker */}
+      {/* Draggable Scrolling Ticker */}
       {restStudents.length > 0 && (
-        <div className="bg-white/10 backdrop-blur py-3 overflow-hidden">
+        <div className="bg-white/10 backdrop-blur py-3 px-2">
           <div 
             ref={tickerRef}
-            className="flex gap-6 animate-marquee whitespace-nowrap"
-            style={{
-              animation: `marquee ${Math.max(restStudents.length * 3, 20)}s linear infinite`
+            className="flex gap-4 overflow-x-auto scrollbar-hide cursor-grab select-none"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
             }}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleMouseUp}
+            onTouchMove={handleTouchMove}
           >
-            {tickerStudents.map((student, index) => (
-              <div 
-                key={`${student.id}-${index}`}
-                className="flex items-center gap-3 bg-white/20 rounded-full px-4 py-2 flex-shrink-0"
-              >
-                <span className="text-white font-bold text-sm">#{sortedStudents.indexOf(student) + 1}</span>
-                {student.image_url ? (
-                  <img
-                    src={student.image_url}
-                    alt={student.name}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-white/50"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-white font-bold text-sm">
-                    {student.name.charAt(0)}
+            {restStudents.map((student) => {
+              const rank = sortedStudents.indexOf(student) + 1;
+              return (
+                <div 
+                  key={student.id}
+                  className="flex items-center gap-3 bg-white/20 hover:bg-white/30 rounded-xl px-4 py-3 flex-shrink-0 transition-all"
+                >
+                  {/* Rank Badge - Beautiful Circle */}
+                  <div className={`w-10 h-10 rounded-full ${getRankStyle(rank)} flex items-center justify-center font-bold text-lg shadow-lg`}>
+                    {rank}
                   </div>
-                )}
-                <span className="text-white font-semibold">{student.name.split(' ').slice(0, 2).join(' ')}</span>
-                <span className="bg-white text-orange-600 px-2 py-0.5 rounded-full font-bold text-sm">
-                  {student.points}
-                </span>
-              </div>
-            ))}
+                  
+                  {/* Student Image */}
+                  {student.image_url ? (
+                    <img
+                      src={student.image_url}
+                      alt={student.name}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center text-white font-bold">
+                      {student.name.charAt(0)}
+                    </div>
+                  )}
+                  
+                  {/* Student Name */}
+                  <span className="text-white font-semibold whitespace-nowrap">
+                    {student.name.split(' ').slice(0, 2).join(' ')}
+                  </span>
+                  
+                  {/* Points Badge */}
+                  <span className="bg-white text-orange-600 px-3 py-1 rounded-full font-bold text-sm shadow">
+                    {student.points}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Scroll Hint */}
+          <div className="text-center mt-2">
+            <span className="text-white/60 text-xs">← اسحب للتصفح →</span>
           </div>
         </div>
       )}
 
-      {/* CSS for marquee animation */}
+      {/* Hide scrollbar CSS */}
       <style>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(50%);
-          }
-        }
-        .animate-marquee {
-          display: flex;
-          animation: marquee 30s linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </div>
