@@ -205,12 +205,6 @@ function Dashboard({ onLogout }) {
     setShowEditModal(true);
   };
 
-  const openCustomPointsModal = (student) => {
-    setSelectedStudent(student);
-    setCustomPoints({ points: 0, reason: "" });
-    setShowCustomPointsModal(true);
-  };
-
   const printAllQRCodes = () => {
     const printWindow = window.open("", "_blank");
     const qrContent = document.getElementById("all-qr-codes").innerHTML;
