@@ -138,6 +138,29 @@ class StudentResponse(BaseModel):
 async def root():
     return {"message": "مرحباً بك في نادي غِراس 🌱"}
 
+
+# Authentication Routes
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login(request: LoginRequest):
+    """تسجيل دخول المسؤول"""
+    if request.username != ADMIN_USERNAME:
+        raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
+    
+    if not pwd_context.verify(request.password, ADMIN_PASSWORD_HASH):
+        raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
+    
+    access_token = create_access_token(data={"sub": request.username})
+    return TokenResponse(
+        access_token=access_token,
+        expires_in=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+    )
+
+
+@api_router.get("/auth/verify")
+async def verify_auth(username: str = Depends(verify_token)):
+    """التحقق من صلاحية التوكن"""
+    return {"valid": True, "username": username}
+
 @api_router.post("/students", response_model=Student)
 async def add_student(input: StudentCreate):
     """إضافة طالب جديد"""
