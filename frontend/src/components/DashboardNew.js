@@ -71,24 +71,31 @@ function Dashboard({ onLogout }) {
         image_url: null
       };
       
-      const response = await axios.post(`${API}/students`, studentData);
+      const response = await axios.post(`${API}/students`, studentData, {
+        headers: getAuthHeader()
+      });
       const newStudent = response.data;
       
       if (addForm.image_file) {
         const formData = new FormData();
         formData.append('file', addForm.image_file);
         await axios.post(`${API}/students/${newStudent.id}/upload-image`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
         });
       }
       
       setAddForm({ name: "", phone: "", supervisor: "", image_file: null });
       setShowAddModal(false);
-      showMessage("تمت إضافة الطالب بنجاح! 🎉");
+      showMessage("تمت إضافة الطالب بنجاح!");
       await fetchStudents();
     } catch (error) {
       console.error("Error adding student:", error);
-      showMessage("حدث خطأ في إضافة الطالب");
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      } else {
+        showMessage("حدث خطأ في إضافة الطالب");
+      }
     } finally {
       setLoading(false);
     }
