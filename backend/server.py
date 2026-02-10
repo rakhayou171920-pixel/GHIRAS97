@@ -207,7 +207,7 @@ async def mark_attendance(student_id: str, _: str = Depends(verify_token)):
     return student
 
 @api_router.put("/students/{student_id}", response_model=Student)
-async def update_student(student_id: str, update_data: StudentUpdate):
+async def update_student(student_id: str, update_data: StudentUpdate, _: str = Depends(verify_token)):
     """تحديث معلومات الطالب"""
     # Get only non-None fields
     update_fields = {k: v for k, v in update_data.model_dump().items() if v is not None}
