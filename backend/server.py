@@ -162,7 +162,7 @@ async def verify_auth(username: str = Depends(verify_token)):
     return {"valid": True, "username": username}
 
 @api_router.post("/students", response_model=Student)
-async def add_student(input: StudentCreate):
+async def add_student(input: StudentCreate, _: str = Depends(verify_token)):
     """إضافة طالب جديد"""
     student = Student(**input.model_dump())
     
