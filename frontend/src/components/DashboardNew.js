@@ -168,40 +168,30 @@ function Dashboard({ onLogout }) {
   const updatePoints = async (studentId, points, reason) => {
     setLoading(true);
     try {
-      await axios.put(`${API}/students/${studentId}/points`, { points, reason });
+      await axios.put(`${API}/students/${studentId}/points`, { points, reason }, {
+        headers: getAuthHeader()
+      });
       const sign = points > 0 ? "+" : "";
-      showMessage(`تم ${reason}! ${sign}${points} نقطة 🌟`);
+      showMessage(`تم ${reason}! ${sign}${points} نقطة`);
+      setShowPointsModal(false);
+      setSelectedStudent(null);
       await fetchStudents();
     } catch (error) {
       console.error("Error updating points:", error);
-      showMessage("حدث خطأ في تحديث النقاط");
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      } else {
+        showMessage("حدث خطأ في تحديث النقاط");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const applyCustomPoints = async (e) => {
-    e.preventDefault();
-    if (!selectedStudent || !customPoints.reason.trim()) return;
-    
-    await updatePoints(selectedStudent.id, parseInt(customPoints.points), customPoints.reason);
-    setShowCustomPointsModal(false);
-    setCustomPoints({ points: 0, reason: "" });
-    setSelectedStudent(null);
-  };
-
-  const markAttendance = async (studentId) => {
-    setLoading(true);
-    try {
-      await axios.put(`${API}/students/${studentId}/attendance`);
-      showMessage("تم تسجيل الحضور! +10 نقاط 🌟");
-      await fetchStudents();
-    } catch (error) {
-      console.error("Error marking attendance:", error);
-      showMessage("حدث خطأ في تسجيل الحضور");
-    } finally {
-      setLoading(false);
-    }
+  const openPointsModal = (student) => {
+    setSelectedStudent(student);
+    setShowPointsModal(true);
   };
 
   const openEditModal = (student) => {
