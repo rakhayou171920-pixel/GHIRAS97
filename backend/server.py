@@ -383,7 +383,7 @@ async def answer_challenge(challenge_id: str, student_id: str, answer: Challenge
     }
 
 @api_router.delete("/challenges/{challenge_id}")
-async def delete_challenge(challenge_id: str):
+async def delete_challenge(challenge_id: str, _: str = Depends(verify_token)):
     """حذف منافسة"""
     result = await db.challenges.delete_one({"id": challenge_id})
     
