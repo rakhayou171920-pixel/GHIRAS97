@@ -399,34 +399,29 @@ function Dashboard({ onLogout }) {
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-1 flex-wrap">
-                      <div className="relative group flex-1">
-                        <button className={`w-full ${color.badge} hover:opacity-90 text-white px-2 py-1 rounded text-xs font-semibold`}>
-                          ⊕ نقاط
-                        </button>
-                        <div className="hidden group-hover:block absolute z-10 bg-white rounded-lg shadow-xl border mt-1 w-48 right-0">
-                          <button onClick={() => markAttendance(student.id)} className="block w-full text-right px-3 py-2 hover:bg-gray-50 text-xs">حضور (+10)</button>
-                          <button onClick={() => updatePoints(student.id, 20, "مشروع طالب")} className="block w-full text-right px-3 py-2 hover:bg-gray-50 text-xs">مشروع طالب (+20)</button>
-                          <button onClick={() => updatePoints(student.id, 20, "إلقاء كلمة")} className="block w-full text-right px-3 py-2 hover:bg-gray-50 text-xs">إلقاء كلمة (+20)</button>
-                          <button onClick={() => updatePoints(student.id, 10, "أفعال إيجابية")} className="block w-full text-right px-3 py-2 hover:bg-gray-50 text-xs">أفعال أخرى (+10)</button>
-                        </div>
-                      </div>
-
-                      <div className="relative group flex-1">
-                        <button className="w-full bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">⊖ خصم</button>
-                        <div className="hidden group-hover:block absolute z-10 bg-white rounded-lg shadow-xl border mt-1 w-48 right-0">
-                          <button onClick={() => updatePoints(student.id, -5, "تأخير")} className="block w-full text-right px-3 py-2 hover:bg-red-50 text-xs">تأخير (-5)</button>
-                          <button onClick={() => updatePoints(student.id, -40, "غياب")} className="block w-full text-right px-3 py-2 hover:bg-red-50 text-xs">غياب (-40)</button>
-                          <button onClick={() => updatePoints(student.id, -40, "التلفظ")} className="block w-full text-right px-3 py-2 hover:bg-red-50 text-xs">التلفظ (-40)</button>
-                          <button onClick={() => updatePoints(student.id, -15, "عدم إحضار الدفتر")} className="block w-full text-right px-3 py-2 hover:bg-red-50 text-xs">عدم إحضار الدفتر (-15)</button>
-                          <button onClick={() => updatePoints(student.id, -10, "أفعال سلبية")} className="block w-full text-right px-3 py-2 hover:bg-red-50 text-xs">أفعال سلبية (-10)</button>
-                        </div>
-                      </div>
-
-                      <button onClick={() => openCustomPointsModal(student)} className="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs" title="نقاط مخصصة">✏️</button>
-                      <button onClick={() => openEditModal(student)} className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">⚙️</button>
-                      <button onClick={() => deleteStudent(student.id)} className="bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded text-xs">🗑️</button>
+                    {/* Actions - Simplified with Points Modal */}
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => openPointsModal(student)} 
+                        className={`flex-1 ${color.badge} hover:opacity-90 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all`}
+                        data-testid={`points-btn-${student.id}`}
+                      >
+                        تعديل النقاط
+                      </button>
+                      <button 
+                        onClick={() => openEditModal(student)} 
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                        data-testid={`edit-btn-${student.id}`}
+                      >
+                        ⚙️
+                      </button>
+                      <button 
+                        onClick={() => deleteStudent(student.id)} 
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm"
+                        data-testid={`delete-btn-${student.id}`}
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 ))}
