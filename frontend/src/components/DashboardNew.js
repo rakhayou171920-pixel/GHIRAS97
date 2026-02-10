@@ -708,14 +708,5 @@ function Dashboard({ onLogout }) {
         </div>
       )}
 
-      {/* Leaderboard Drawer */}
-      <LeaderboardDrawer
-        students={students}
-        isOpen={showLeaderboard}
-        onClose={() => setShowLeaderboard(false)}
-      />
-    </div>
-  );
-}
-
-export default Dashboard;
+      {/* QR Codes Modal */}
+      {showQRModal && (
