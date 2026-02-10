@@ -707,6 +707,8 @@ function Dashboard({ onLogout }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* QR Codes Modal */}
-      {showQRModal && (
+export default Dashboard;
