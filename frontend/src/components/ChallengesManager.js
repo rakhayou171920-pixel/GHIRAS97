@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function ChallengesManager() {
+// Get token from localStorage
+const getAuthHeader = () => {
+  const token = localStorage.getItem("ghiras_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+function ChallengesManager({ onLogout }) {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -34,7 +41,9 @@ function ChallengesManager() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/challenges`, newChallenge);
+      await axios.post(`${API}/challenges`, newChallenge, {
+        headers: getAuthHeader()
+      });
       setNewChallenge({
         question: "",
         options: ["", "", "", ""],
@@ -42,11 +51,16 @@ function ChallengesManager() {
         points: 10
       });
       setShowAddModal(false);
-      showMessage("تمت إضافة المنافسة بنجاح! 🎉");
+      showMessage("تمت إضافة المنافسة بنجاح!");
       await fetchChallenges();
     } catch (error) {
       console.error("Error adding challenge:", error);
-      showMessage("حدث خطأ في إضافة المنافسة");
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      } else {
+        showMessage("حدث خطأ في إضافة المنافسة");
+      }
     } finally {
       setLoading(false);
     }
@@ -54,11 +68,17 @@ function ChallengesManager() {
 
   const toggleChallenge = async (challengeId) => {
     try {
-      await axios.put(`${API}/challenges/${challengeId}/toggle`);
+      await axios.put(`${API}/challenges/${challengeId}/toggle`, {}, {
+        headers: getAuthHeader()
+      });
       showMessage("تم تحديث حالة المنافسة");
       await fetchChallenges();
     } catch (error) {
       console.error("Error toggling challenge:", error);
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      }
     }
   };
 
@@ -66,11 +86,17 @@ function ChallengesManager() {
     if (!window.confirm("هل أنت متأكد من حذف هذه المنافسة؟")) return;
     
     try {
-      await axios.delete(`${API}/challenges/${challengeId}`);
+      await axios.delete(`${API}/challenges/${challengeId}`, {
+        headers: getAuthHeader()
+      });
       showMessage("تم حذف المنافسة بنجاح");
       await fetchChallenges();
     } catch (error) {
       console.error("Error deleting challenge:", error);
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      }
     }
   };
 
@@ -81,13 +107,21 @@ function ChallengesManager() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-8 shadow-lg">
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 flex items-center justify-center gap-3">
-            <span className="text-5xl">🎯</span>
-            <span>إدارة المنافسات</span>
-          </h1>
-          <p className="text-center text-purple-100 text-lg">أسئلة تفاعلية مع نقاط مكافأة</p>
+          <div className="flex items-center justify-between mb-2">
+            <Link
+              to="/"
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+            >
+              ← العودة للرئيسية
+            </Link>
+            <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
+              <span>إدارة المنافسات</span>
+              <span className="text-4xl">🎯</span>
+            </h1>
+          </div>
+          <p className="text-center text-purple-100 text-base">أسئلة تفاعلية مع نقاط مكافأة</p>
         </div>
       </div>
 
