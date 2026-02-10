@@ -113,23 +113,30 @@ function Dashboard({ onLogout }) {
         supervisor: editForm.supervisor || null
       };
       
-      await axios.put(`${API}/students/${selectedStudent.id}`, updateData);
+      await axios.put(`${API}/students/${selectedStudent.id}`, updateData, {
+        headers: getAuthHeader()
+      });
       
       if (editForm.image_file) {
         const formData = new FormData();
         formData.append('file', editForm.image_file);
         await axios.post(`${API}/students/${selectedStudent.id}/upload-image`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
         });
       }
       
       setShowEditModal(false);
       setSelectedStudent(null);
-      showMessage("تم تحديث بيانات الطالب بنجاح! ✅");
+      showMessage("تم تحديث بيانات الطالب بنجاح!");
       await fetchStudents();
     } catch (error) {
       console.error("Error updating student:", error);
-      showMessage("حدث خطأ في تحديث البيانات");
+      if (error.response?.status === 401) {
+        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
+        onLogout?.();
+      } else {
+        showMessage("حدث خطأ في تحديث البيانات");
+      }
     } finally {
       setLoading(false);
     }
