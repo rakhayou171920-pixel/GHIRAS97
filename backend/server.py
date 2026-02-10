@@ -189,7 +189,7 @@ async def get_students():
     return students
 
 @api_router.put("/students/{student_id}/attendance")
-async def mark_attendance(student_id: str):
+async def mark_attendance(student_id: str, _: str = Depends(verify_token)):
     """تسجيل حضور - إضافة 10 نقاط"""
     result = await db.students.update_one(
         {"id": student_id},
