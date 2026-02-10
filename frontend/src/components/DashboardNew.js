@@ -712,6 +712,13 @@ function Dashboard({ onLogout }) {
           </div>
         </div>
       )}
+
+      {/* Leaderboard Drawer */}
+      <LeaderboardDrawer
+        students={students}
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+      />
     </div>
   );
 }
