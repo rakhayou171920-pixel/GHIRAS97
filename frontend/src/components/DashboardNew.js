@@ -25,17 +25,16 @@ const SUPERVISOR_COLORS = [
   { bg: "bg-cyan-50", border: "border-cyan-500", text: "text-cyan-800", badge: "bg-cyan-500" }
 ];
 
-function Dashboard() {
+function Dashboard({ onLogout }) {
   const [students, setStudents] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showCustomPointsModal, setShowCustomPointsModal] = useState(false);
+  const [showPointsModal, setShowPointsModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [customPoints, setCustomPoints] = useState({ points: 0, reason: "" });
   const [editForm, setEditForm] = useState({ name: "", phone: "", supervisor: "", image_file: null });
   const [addForm, setAddForm] = useState({ name: "", phone: "", supervisor: "", image_file: null });
   const qrPrintRef = useRef();
