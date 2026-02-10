@@ -393,7 +393,7 @@ async def delete_challenge(challenge_id: str, _: str = Depends(verify_token)):
     return {"message": "تم حذف المنافسة بنجاح", "deleted": True}
 
 @api_router.put("/challenges/{challenge_id}/toggle")
-async def toggle_challenge(challenge_id: str):
+async def toggle_challenge(challenge_id: str, _: str = Depends(verify_token)):
     """تفعيل/إيقاف منافسة"""
     challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
     if not challenge:
