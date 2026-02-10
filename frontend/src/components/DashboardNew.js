@@ -306,13 +306,6 @@ function Dashboard({ onLogout }) {
           >
             ➕ إضافة طالب جديد
           </button>
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all"
-            data-testid="leaderboard-btn"
-          >
-            🏆 ترتيب الطلاب
-          </button>
           <Link
             to="/challenges"
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all inline-block"
@@ -328,6 +321,9 @@ function Dashboard({ onLogout }) {
             📱 باركودات الطلاب
           </button>
         </div>
+
+        {/* Leaderboard Ticker */}
+        <LeaderboardTicker students={students} />
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
