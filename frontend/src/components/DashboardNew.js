@@ -647,57 +647,17 @@ function Dashboard({ onLogout }) {
         </div>
       )}
 
-      {/* Custom Points Modal */}
-      {showCustomPointsModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">✏️ نقاط مخصصة</h3>
-            <p className="text-gray-600 mb-4">الطالب: <span className="font-bold">{selectedStudent.name}</span></p>
-            <form onSubmit={applyCustomPoints}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">عدد النقاط *</label>
-                  <input
-                    type="number"
-                    value={customPoints.points}
-                    onChange={(e) => setCustomPoints({ ...customPoints, points: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
-                    placeholder="أدخل عدد النقاط (موجب أو سالب)"
-                    required
-                  />
-                  <p className="text-sm text-gray-500 mt-1">مثال: 50 أو -25</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">السبب *</label>
-                  <input
-                    type="text"
-                    value={customPoints.reason}
-                    onChange={(e) => setCustomPoints({ ...customPoints, reason: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
-                    placeholder="مثال: فوز في مسابقة"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition-all disabled:opacity-50"
-                >
-                  {loading ? "جاري التطبيق..." : "تطبيق"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCustomPointsModal(false)}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-all"
-                >
-                  إلغاء
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {/* Points Modal */}
+      {showPointsModal && selectedStudent && (
+        <PointsModal
+          student={selectedStudent}
+          onClose={() => {
+            setShowPointsModal(false);
+            setSelectedStudent(null);
+          }}
+          onUpdatePoints={updatePoints}
+          loading={loading}
+        />
       )}
 
       {/* QR Codes Modal */}
