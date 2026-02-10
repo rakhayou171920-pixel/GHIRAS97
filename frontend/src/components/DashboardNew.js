@@ -266,13 +266,25 @@ function Dashboard({ onLogout }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-8 shadow-lg">
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <img src="/logo.png" alt="شعار النادي" className="w-16 h-16 rounded-full bg-white p-2" />
-            <h1 className="text-4xl md:text-5xl font-bold">🌱 نادي غِراس</h1>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={onLogout}
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-2"
+              data-testid="logout-btn"
+            >
+              <span>تسجيل الخروج</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl md:text-4xl font-bold">نادي غِراس</h1>
+              <img src="/logo.png" alt="شعار النادي" className="w-14 h-14 rounded-full bg-white p-1" />
+            </div>
           </div>
-          <p className="text-center text-green-100 text-lg">منصة تتبع نقاط الطلاب</p>
+          <p className="text-center text-green-100 text-base">لوحة تحكم المسؤول - إدارة نقاط الطلاب</p>
         </div>
       </div>
 
@@ -288,19 +300,22 @@ function Dashboard({ onLogout }) {
         <div className="mb-6 flex flex-wrap gap-3 justify-center">
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all"
+            data-testid="add-student-btn"
           >
             ➕ إضافة طالب جديد
           </button>
           <Link
             to="/challenges"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all inline-block"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all inline-block"
+            data-testid="challenges-link"
           >
             🎯 إدارة المنافسات
           </Link>
           <button
             onClick={() => setShowQRModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all"
+            data-testid="qr-codes-btn"
           >
             📱 باركودات الطلاب
           </button>
