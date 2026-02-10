@@ -35,7 +35,6 @@ function Dashboard({ onLogout }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", phone: "", supervisor: "", image_file: null });
   const [addForm, setAddForm] = useState({ name: "", phone: "", supervisor: "", image_file: null });
