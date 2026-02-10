@@ -2,9 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
+import PointsModal from "./PointsModal";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Get token from localStorage
+const getAuthHeader = () => {
+  const token = localStorage.getItem("ghiras_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Predefined colors for supervisors
 const SUPERVISOR_COLORS = [
