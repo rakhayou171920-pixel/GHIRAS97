@@ -26,7 +26,7 @@ const SUPERVISOR_COLORS = [
   { bg: "bg-cyan-50", border: "border-cyan-500", text: "text-cyan-800", badge: "bg-cyan-500" }
 ];
 
-function Dashboard({ onLogout }) {
+function Dashboard() {
   const [students, setStudents] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(false);
