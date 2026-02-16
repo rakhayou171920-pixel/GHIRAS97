@@ -66,16 +66,14 @@ function Dashboard() {
         image_url: null
       };
       
-      const response = await axios.post(`${API}/students`, studentData, {
-        headers: getAuthHeader()
-      });
+      const response = await axios.post(`${API}/students`, studentData);
       const newStudent = response.data;
       
       if (addForm.image_file) {
         const formData = new FormData();
         formData.append('file', addForm.image_file);
         await axios.post(`${API}/students/${newStudent.id}/upload-image`, formData, {
-          headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
       
@@ -85,12 +83,7 @@ function Dashboard() {
       await fetchStudents();
     } catch (error) {
       console.error("Error adding student:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      } else {
-        showMessage("حدث خطأ في إضافة الطالب");
-      }
+      showMessage("حدث خطأ في إضافة الطالب");
     } finally {
       setLoading(false);
     }
