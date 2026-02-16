@@ -142,9 +142,7 @@ function Dashboard() {
   const updatePoints = async (studentId, points, reason) => {
     setLoading(true);
     try {
-      await axios.put(`${API}/students/${studentId}/points`, { points, reason }, {
-        headers: getAuthHeader()
-      });
+      await axios.put(`${API}/students/${studentId}/points`, { points, reason });
       const sign = points > 0 ? "+" : "";
       showMessage(`تم ${reason}! ${sign}${points} نقطة`);
       setShowPointsModal(false);
@@ -152,12 +150,7 @@ function Dashboard() {
       await fetchStudents();
     } catch (error) {
       console.error("Error updating points:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      } else {
-        showMessage("حدث خطأ في تحديث النقاط");
-      }
+      showMessage("حدث خطأ في تحديث النقاط");
     } finally {
       setLoading(false);
     }
