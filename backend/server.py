@@ -29,8 +29,7 @@ api_router = APIRouter(prefix="/api")
 
 # Ramadan Quiz Questions - أسئلة مسابقة رمضان (15 سؤال)
 # رمضان 1447 في السعودية يبدأ تقريباً 18 فبراير 2026
-# للتجربة الآن: نستخدم تاريخ قريب
-RAMADAN_START_DATE = datetime(2025, 12, 16, 0, 0, 0, tzinfo=timezone.utc)
+RAMADAN_START_DATE = datetime(2026, 2, 18, 0, 0, 0, tzinfo=timezone.utc)
 
 RAMADAN_QUESTIONS = [
     {
