@@ -5,13 +5,7 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Get token from localStorage
-const getAuthHeader = () => {
-  const token = localStorage.getItem("ghiras_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-function ChallengesManager({ onLogout }) {
+function ChallengesManager() {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -41,9 +35,7 @@ function ChallengesManager({ onLogout }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/challenges`, newChallenge, {
-        headers: getAuthHeader()
-      });
+      await axios.post(`${API}/challenges`, newChallenge);
       setNewChallenge({
         question: "",
         options: ["", "", "", ""],
@@ -55,12 +47,7 @@ function ChallengesManager({ onLogout }) {
       await fetchChallenges();
     } catch (error) {
       console.error("Error adding challenge:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      } else {
-        showMessage("حدث خطأ في إضافة المنافسة");
-      }
+      showMessage("حدث خطأ في إضافة المنافسة");
     } finally {
       setLoading(false);
     }
@@ -68,17 +55,11 @@ function ChallengesManager({ onLogout }) {
 
   const toggleChallenge = async (challengeId) => {
     try {
-      await axios.put(`${API}/challenges/${challengeId}/toggle`, {}, {
-        headers: getAuthHeader()
-      });
+      await axios.put(`${API}/challenges/${challengeId}/toggle`);
       showMessage("تم تحديث حالة المنافسة");
       await fetchChallenges();
     } catch (error) {
       console.error("Error toggling challenge:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      }
     }
   };
 
@@ -86,17 +67,11 @@ function ChallengesManager({ onLogout }) {
     if (!window.confirm("هل أنت متأكد من حذف هذه المنافسة؟")) return;
     
     try {
-      await axios.delete(`${API}/challenges/${challengeId}`, {
-        headers: getAuthHeader()
-      });
+      await axios.delete(`${API}/challenges/${challengeId}`);
       showMessage("تم حذف المنافسة بنجاح");
       await fetchChallenges();
     } catch (error) {
       console.error("Error deleting challenge:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      }
     }
   };
 
