@@ -518,7 +518,7 @@ async def get_student_profile(student_id: str):
     }
 
 @api_router.post("/students/{student_id}/upload-image")
-async def upload_student_image(student_id: str, file: UploadFile = File(...), _: str = Depends(verify_token)):
+async def upload_student_image(student_id: str, file: UploadFile = File(...)):
     """رفع صورة الطالب"""
     # Check if student exists
     student = await db.students.find_one({"id": student_id}, {"_id": 0})
