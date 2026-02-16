@@ -8,12 +8,6 @@ import LeaderboardTicker from "./LeaderboardTicker";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Get token from localStorage
-const getAuthHeader = () => {
-  const token = localStorage.getItem("ghiras_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 // Predefined colors for supervisors
 const SUPERVISOR_COLORS = [
   { bg: "bg-blue-50", border: "border-blue-500", text: "text-blue-800", badge: "bg-blue-500" },
