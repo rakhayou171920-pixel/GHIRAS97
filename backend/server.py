@@ -306,30 +306,97 @@ async def root():
     return {"message": "مرحباً بك في نادي غِراس 🌱"}
 
 
-# Authentication Routes
-@api_router.post("/auth/login", response_model=TokenResponse)
-async def login(request: LoginRequest):
-    """تسجيل دخول المسؤول"""
-    if request.username != ADMIN_USERNAME:
-        raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
+# Ramadan Quiz API
+@api_router.get("/ramadan-quiz/today")
+async def get_today_ramadan_question():
+    """جلب سؤال اليوم لمسابقة رمضان"""
+    # Get current day of Ramadan (1-30)
+    # For testing, we'll use the current day of month
+    # In production, this should be calculated based on Ramadan start date
+    today = datetime.now(timezone.utc)
+    day_of_month = today.day
     
-    if not pwd_context.verify(request.password, ADMIN_PASSWORD_HASH):
-        raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة")
+    # Make sure day is within 1-30
+    day_index = (day_of_month - 1) % 30
     
-    access_token = create_access_token(data={"sub": request.username})
-    return TokenResponse(
-        access_token=access_token,
-        expires_in=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-    )
+    question_data = RAMADAN_QUESTIONS[day_index]
+    
+    return {
+        "day": question_data["day"],
+        "question": question_data["question"],
+        "options": question_data["options"],
+        "points": question_data["points"]
+    }
 
 
-@api_router.get("/auth/verify")
-async def verify_auth(username: str = Depends(verify_token)):
-    """التحقق من صلاحية التوكن"""
-    return {"valid": True, "username": username}
+@api_router.post("/ramadan-quiz/answer/{student_id}")
+async def answer_ramadan_quiz(student_id: str, answer: int):
+    """إجابة على سؤال مسابقة رمضان"""
+    # Get current day question
+    today = datetime.now(timezone.utc)
+    day_of_month = today.day
+    day_index = (day_of_month - 1) % 30
+    
+    question_data = RAMADAN_QUESTIONS[day_index]
+    quiz_id = f"ramadan_day_{question_data['day']}"
+    
+    # Check if student exists
+    student = await db.students.find_one({"id": student_id})
+    if not student:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+    
+    # Check if already answered today's question
+    answered = student.get("answered_ramadan", [])
+    if quiz_id in answered:
+        raise HTTPException(status_code=400, detail="لقد أجبت على سؤال اليوم مسبقاً")
+    
+    # Check answer
+    is_correct = answer == question_data["correct"]
+    points_earned = question_data["points"] if is_correct else 0
+    
+    # Update student
+    update_data = {
+        "$push": {"answered_ramadan": quiz_id}
+    }
+    
+    if is_correct:
+        update_data["$inc"] = {"points": points_earned}
+    
+    await db.students.update_one({"id": student_id}, update_data)
+    
+    return {
+        "correct": is_correct,
+        "points_earned": points_earned,
+        "correct_answer": question_data["correct"],
+        "message": "أحسنت! إجابة صحيحة 🎉" if is_correct else "إجابة خاطئة، حاول غداً 💪"
+    }
+
+
+@api_router.get("/ramadan-quiz/status/{student_id}")
+async def get_ramadan_quiz_status(student_id: str):
+    """التحقق إذا كان الطالب قد أجاب على سؤال اليوم"""
+    student = await db.students.find_one({"id": student_id})
+    if not student:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+    
+    today = datetime.now(timezone.utc)
+    day_of_month = today.day
+    day_index = (day_of_month - 1) % 30
+    
+    question_data = RAMADAN_QUESTIONS[day_index]
+    quiz_id = f"ramadan_day_{question_data['day']}"
+    
+    answered = student.get("answered_ramadan", [])
+    
+    return {
+        "day": question_data["day"],
+        "already_answered": quiz_id in answered,
+        "total_answered": len(answered)
+    }
+
 
 @api_router.post("/students", response_model=Student)
-async def add_student(input: StudentCreate, _: str = Depends(verify_token)):
+async def add_student(input: StudentCreate):
     """إضافة طالب جديد"""
     student = Student(**input.model_dump())
     
