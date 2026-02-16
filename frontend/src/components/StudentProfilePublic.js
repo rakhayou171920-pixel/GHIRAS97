@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
+import RamadanQuiz from "./RamadanQuiz";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -34,6 +35,11 @@ function StudentProfilePublic() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRamadanPointsEarned = (points) => {
+    // Refresh profile data to update points
+    fetchData();
   };
 
   const showMessage = (msg, type = "success") => {
