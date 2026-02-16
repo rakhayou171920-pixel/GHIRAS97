@@ -332,12 +332,10 @@ async def get_ramadan_quiz_status(student_id: str):
     
     quiz_id = f"ramadan_day_{ramadan_day}"
     answered = student.get("answered_ramadan", [])
-    quiz_id = f"ramadan_day_{question_data['day']}"
-    
-    answered = student.get("answered_ramadan", [])
     
     return {
-        "day": question_data["day"],
+        "status": "active",
+        "day": ramadan_day,
         "already_answered": quiz_id in answered,
         "total_answered": len(answered)
     }
