@@ -475,7 +475,7 @@ async def delete_student(student_id: str):
     return {"message": "تم حذف الطالب بنجاح", "deleted": True}
 
 @api_router.put("/students/{student_id}/points")
-async def update_points(student_id: str, points_data: PointsUpdate, _: str = Depends(verify_token)):
+async def update_points(student_id: str, points_data: PointsUpdate):
     """إضافة أو خصم نقاط (للأفعال المختلفة)"""
     result = await db.students.update_one(
         {"id": student_id},
