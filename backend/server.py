@@ -224,19 +224,35 @@ async def root():
 @api_router.get("/ramadan-quiz/today")
 async def get_today_ramadan_question():
     """جلب سؤال اليوم لمسابقة رمضان"""
-    # Get current day of Ramadan (1-30)
-    # For testing, we'll use the current day of month
-    # In production, this should be calculated based on Ramadan start date
-    today = datetime.now(timezone.utc)
-    day_of_month = today.day
+    ramadan_day = get_ramadan_day()
     
-    # Make sure day is within 1-30
-    day_index = (day_of_month - 1) % 30
+    # قبل رمضان
+    if ramadan_day == 0:
+        return {
+            "status": "not_started",
+            "message": "لم تبدأ مسابقة رمضان بعد",
+            "start_date": RAMADAN_START_DATE.strftime("%Y-%m-%d")
+        }
     
-    question_data = RAMADAN_QUESTIONS[day_index]
+    # بعد رمضان
+    if ramadan_day == -1:
+        return {
+            "status": "ended",
+            "message": "انتهت مسابقة رمضان لهذا العام"
+        }
+    
+    # المسابقة 15 يوم فقط
+    if ramadan_day > 15:
+        return {
+            "status": "completed",
+            "message": "انتهت أسئلة المسابقة! شكراً لمشاركتك 🎉"
+        }
+    
+    question_data = RAMADAN_QUESTIONS[ramadan_day - 1]
     
     return {
-        "day": question_data["day"],
+        "status": "active",
+        "day": ramadan_day,
         "question": question_data["question"],
         "options": question_data["options"],
         "points": question_data["points"]
@@ -246,13 +262,14 @@ async def get_today_ramadan_question():
 @api_router.post("/ramadan-quiz/answer/{student_id}")
 async def answer_ramadan_quiz(student_id: str, answer: int):
     """إجابة على سؤال مسابقة رمضان"""
-    # Get current day question
-    today = datetime.now(timezone.utc)
-    day_of_month = today.day
-    day_index = (day_of_month - 1) % 30
+    ramadan_day = get_ramadan_day()
     
-    question_data = RAMADAN_QUESTIONS[day_index]
-    quiz_id = f"ramadan_day_{question_data['day']}"
+    # التحقق من أن المسابقة فعالة
+    if ramadan_day <= 0 or ramadan_day > 15:
+        raise HTTPException(status_code=400, detail="المسابقة غير متاحة حالياً")
+    
+    question_data = RAMADAN_QUESTIONS[ramadan_day - 1]
+    quiz_id = f"ramadan_day_{ramadan_day}"
     
     # Check if student exists
     student = await db.students.find_one({"id": student_id})
@@ -293,11 +310,28 @@ async def get_ramadan_quiz_status(student_id: str):
     if not student:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
     
-    today = datetime.now(timezone.utc)
-    day_of_month = today.day
-    day_index = (day_of_month - 1) % 30
+    ramadan_day = get_ramadan_day()
     
-    question_data = RAMADAN_QUESTIONS[day_index]
+    # قبل أو بعد رمضان
+    if ramadan_day <= 0:
+        return {
+            "status": "not_active",
+            "day": 0,
+            "already_answered": False,
+            "total_answered": len(student.get("answered_ramadan", []))
+        }
+    
+    # بعد انتهاء الأسئلة
+    if ramadan_day > 15:
+        return {
+            "status": "completed",
+            "day": ramadan_day,
+            "already_answered": True,
+            "total_answered": len(student.get("answered_ramadan", []))
+        }
+    
+    quiz_id = f"ramadan_day_{ramadan_day}"
+    answered = student.get("answered_ramadan", [])
     quiz_id = f"ramadan_day_{question_data['day']}"
     
     answered = student.get("answered_ramadan", [])
