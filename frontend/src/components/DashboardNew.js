@@ -101,15 +101,13 @@ function Dashboard() {
         supervisor: editForm.supervisor || null
       };
       
-      await axios.put(`${API}/students/${selectedStudent.id}`, updateData, {
-        headers: getAuthHeader()
-      });
+      await axios.put(`${API}/students/${selectedStudent.id}`, updateData);
       
       if (editForm.image_file) {
         const formData = new FormData();
         formData.append('file', editForm.image_file);
         await axios.post(`${API}/students/${selectedStudent.id}/upload-image`, formData, {
-          headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
       
@@ -119,12 +117,7 @@ function Dashboard() {
       await fetchStudents();
     } catch (error) {
       console.error("Error updating student:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      } else {
-        showMessage("حدث خطأ في تحديث البيانات");
-      }
+      showMessage("حدث خطأ في تحديث البيانات");
     } finally {
       setLoading(false);
     }
