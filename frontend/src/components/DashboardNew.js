@@ -128,19 +128,12 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      await axios.delete(`${API}/students/${studentId}`, {
-        headers: getAuthHeader()
-      });
+      await axios.delete(`${API}/students/${studentId}`);
       showMessage("تم حذف الطالب بنجاح!");
       await fetchStudents();
     } catch (error) {
       console.error("Error deleting student:", error);
-      if (error.response?.status === 401) {
-        showMessage("انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى");
-        onLogout?.();
-      } else {
-        showMessage("حدث خطأ في حذف الطالب");
-      }
+      showMessage("حدث خطأ في حذف الطالب");
     } finally {
       setLoading(false);
     }
