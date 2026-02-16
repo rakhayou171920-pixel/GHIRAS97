@@ -465,7 +465,7 @@ async def update_student(student_id: str, update_data: StudentUpdate):
     return updated_student
 
 @api_router.delete("/students/{student_id}")
-async def delete_student(student_id: str, _: str = Depends(verify_token)):
+async def delete_student(student_id: str):
     """حذف طالب"""
     result = await db.students.delete_one({"id": student_id})
     
