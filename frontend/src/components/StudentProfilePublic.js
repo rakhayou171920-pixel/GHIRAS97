@@ -261,6 +261,12 @@ function StudentProfilePublic() {
 
             {/* Right Column */}
             <div className="lg:col-span-2 space-y-8">
+              {/* Ramadan Quiz Section */}
+              <RamadanQuiz 
+                studentId={studentId} 
+                onPointsEarned={handleRamadanPointsEarned}
+              />
+
               {/* Challenges Section */}
               {availableChallenges.length > 0 && (
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-t-4 border-purple-500">
