@@ -239,10 +239,6 @@ RAMADAN_QUESTIONS = [
         "points": 20
     }
 ]
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="انتهت صلاحية التوكن")
-    except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="توكن غير صالح")
 
 
 # Define Models for Ghiras Club
