@@ -11,6 +11,7 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [quizStatus, setQuizStatus] = useState(null); // not_started, active, ended, completed
 
   useEffect(() => {
     fetchQuizData();
@@ -22,11 +23,24 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
       
       // Fetch today's question
       const questionRes = await axios.get(`${API}/ramadan-quiz/today`);
-      setQuestion(questionRes.data);
       
-      // Fetch student's status
-      const statusRes = await axios.get(`${API}/ramadan-quiz/status/${studentId}`);
-      setStatus(statusRes.data);
+      if (questionRes.data.status === "not_started") {
+        setQuizStatus("not_started");
+        setQuestion(questionRes.data);
+      } else if (questionRes.data.status === "ended") {
+        setQuizStatus("ended");
+        setQuestion(questionRes.data);
+      } else if (questionRes.data.status === "completed") {
+        setQuizStatus("completed");
+        setQuestion(questionRes.data);
+      } else {
+        setQuizStatus("active");
+        setQuestion(questionRes.data);
+        
+        // Fetch student's status
+        const statusRes = await axios.get(`${API}/ramadan-quiz/status/${studentId}`);
+        setStatus(statusRes.data);
+      }
       
     } catch (error) {
       console.error("Error fetching quiz data:", error);
@@ -68,6 +82,29 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
     );
   }
 
+  // المسابقة لم تبدأ بعد
+  if (quizStatus === "not_started") {
+    return (
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 text-white text-center" dir="rtl">
+        <span className="text-5xl block mb-4">🌙</span>
+        <h3 className="text-xl font-bold mb-2">مسابقة رمضان</h3>
+        <p className="text-blue-100">ستبدأ المسابقة في أول يوم من رمضان</p>
+        <p className="text-blue-200 text-sm mt-2">ترقبوا 15 سؤال مع جوائز نقاط!</p>
+      </div>
+    );
+  }
+
+  // المسابقة انتهت
+  if (quizStatus === "ended" || quizStatus === "completed") {
+    return (
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white text-center" dir="rtl">
+        <span className="text-5xl block mb-4">🎉</span>
+        <h3 className="text-xl font-bold mb-2">مسابقة رمضان</h3>
+        <p className="text-green-100">{question?.message || "شكراً لمشاركتك في المسابقة!"}</p>
+      </div>
+    );
+  }
+
   if (!question) return null;
 
   // Already answered today
@@ -87,7 +124,7 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
           <p className="text-lg font-semibold">لقد أجبت على سؤال اليوم!</p>
           <p className="text-green-100 text-sm mt-2">عُد غداً للسؤال الجديد إن شاء الله</p>
           <div className="mt-3 bg-white/20 rounded-lg px-4 py-2 inline-block">
-            <span className="text-sm">أجبت على {status.total_answered} سؤال</span>
+            <span className="text-sm">أجبت على {status.total_answered} من 15 سؤال</span>
           </div>
         </div>
       </div>
@@ -137,7 +174,7 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
         <span className="text-4xl">🌙</span>
         <div>
           <h3 className="text-xl font-bold text-white">مسابقة رمضان</h3>
-          <p className="text-purple-200 text-sm">اليوم {question.day} من رمضان • {question.points} نقطة</p>
+          <p className="text-purple-200 text-sm">اليوم {question.day} من 15 • {question.points} نقطة</p>
         </div>
       </div>
       
