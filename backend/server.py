@@ -1,5 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, File, UploadFile, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import FastAPI, APIRouter, HTTPException, File, UploadFile
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,10 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone, timedelta
-import base64
-import jwt
-from passlib.context import CryptContext
+from datetime import datetime, timezone
 
 
 ROOT_DIR = Path(__file__).parent
@@ -29,45 +25,220 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Security setup
-SECRET_KEY = os.environ.get('JWT_SECRET', 'ghiras-club-secret-key-2024')
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-security = HTTPBearer()
-
-# Admin credentials (single admin)
-ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD_HASH = pwd_context.hash(os.environ.get('ADMIN_PASSWORD', 'ghiras2024'))
-
-
-# Authentication Models
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    expires_in: int
-
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="توكن غير صالح")
-        return username
+# Ramadan Quiz Questions - أسئلة مسابقة رمضان
+RAMADAN_QUESTIONS = [
+    {
+        "day": 1,
+        "question": "في أي سنة هجرية فُرض صيام شهر رمضان على المسلمين؟",
+        "options": ["السنة الأولى", "السنة الثانية", "السنة الثالثة", "السنة الرابعة"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 2,
+        "question": "ما هي الغزوة الكبرى التي وقعت في رمضان في السنة الثانية للهجرة؟",
+        "options": ["غزوة أحد", "غزوة بدر", "غزوة الخندق", "غزوة حنين"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 3,
+        "question": "في أي ليلة من رمضان نزل القرآن الكريم؟",
+        "options": ["ليلة 15", "ليلة 21", "ليلة القدر", "ليلة 1"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 4,
+        "question": "ما اسم الصحابي الذي كان يؤذن لصلاة الفجر في رمضان بالمدينة؟",
+        "options": ["بلال بن رباح", "عبدالله بن أم مكتوم", "أبو بكر الصديق", "عمر بن الخطاب"],
+        "correct": 0,
+        "points": 20
+    },
+    {
+        "day": 5,
+        "question": "كم عدد المسلمين في غزوة بدر التي وقعت في رمضان؟",
+        "options": ["100 مقاتل", "200 مقاتل", "313 مقاتل", "500 مقاتل"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 6,
+        "question": "في أي عام هجري فُتحت مكة في شهر رمضان؟",
+        "options": ["السنة 6", "السنة 7", "السنة 8", "السنة 9"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 7,
+        "question": "من هو الصحابي الذي توفي في رمضان وكان أول من أسلم من الرجال؟",
+        "options": ["علي بن أبي طالب", "أبو بكر الصديق", "عثمان بن عفان", "زيد بن حارثة"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 8,
+        "question": "ما هي السورة التي ذُكر فيها شهر رمضان بالاسم؟",
+        "options": ["سورة آل عمران", "سورة البقرة", "سورة النساء", "سورة المائدة"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 9,
+        "question": "كان النبي ﷺ يعتكف في رمضان، في أي أيام كان يعتكف؟",
+        "options": ["أول عشرة أيام", "العشر الوسطى", "العشر الأواخر", "الشهر كله"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 10,
+        "question": "من هي زوجة النبي ﷺ التي توفيت في رمضان؟",
+        "options": ["عائشة رضي الله عنها", "خديجة رضي الله عنها", "حفصة رضي الله عنها", "زينب رضي الله عنها"],
+        "correct": 3,
+        "points": 20
+    },
+    {
+        "day": 11,
+        "question": "ماذا كان يكثر النبي ﷺ في شهر رمضان؟",
+        "options": ["النوم", "الصدقة والجود", "السفر", "الصمت"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 12,
+        "question": "من كان يدارس النبي ﷺ القرآن في رمضان؟",
+        "options": ["أبو بكر الصديق", "جبريل عليه السلام", "عمر بن الخطاب", "علي بن أبي طالب"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 13,
+        "question": "ما هي العبادة التي تُضاعف أجرها في رمضان وتعادل حجة مع النبي؟",
+        "options": ["الصلاة", "الصيام", "العمرة", "الصدقة"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 14,
+        "question": "كم مرة ختم النبي ﷺ القرآن مع جبريل في رمضان الأخير من حياته؟",
+        "options": ["مرة واحدة", "مرتين", "ثلاث مرات", "أربع مرات"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 15,
+        "question": "ما اسم الوجبة التي يتناولها المسلم قبل الفجر في رمضان؟",
+        "options": ["الإفطار", "السحور", "الغداء", "العشاء"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 16,
+        "question": "ما هي الصلاة التي تُصلى جماعة في ليالي رمضان؟",
+        "options": ["صلاة الضحى", "صلاة التراويح", "صلاة الوتر", "صلاة الاستخارة"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 17,
+        "question": "في أي يوم من رمضان وقعت غزوة بدر الكبرى؟",
+        "options": ["1 رمضان", "10 رمضان", "17 رمضان", "27 رمضان"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 18,
+        "question": "ما الدعاء الذي علّمه النبي ﷺ لعائشة لليلة القدر؟",
+        "options": ["اللهم اغفر لي", "اللهم إنك عفو تحب العفو فاعف عني", "اللهم ارزقني", "اللهم اهدني"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 19,
+        "question": "كم عدد ركعات صلاة التراويح التي صلاها عمر بن الخطاب بالناس؟",
+        "options": ["8 ركعات", "11 ركعة", "20 ركعة", "23 ركعة"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 20,
+        "question": "ما هو ثواب من فطّر صائماً في رمضان؟",
+        "options": ["نصف أجر الصائم", "مثل أجر الصائم", "ضعف أجر الصائم", "ثلث أجر الصائم"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 21,
+        "question": "متى تكون ليلة القدر حسب الأرجح من أقوال العلماء؟",
+        "options": ["ليلة 21", "ليلة 23", "ليلة 27", "ليلة 29"],
+        "correct": 2,
+        "points": 20
+    },
+    {
+        "day": 22,
+        "question": "ما هي صدقة الفطر التي تُخرج في نهاية رمضان؟",
+        "options": ["صدقة مال", "صدقة طعام", "صدقة ملابس", "صدقة ذهب"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 23,
+        "question": "من هو الخليفة الذي جمع الناس على إمام واحد لصلاة التراويح؟",
+        "options": ["أبو بكر الصديق", "عمر بن الخطاب", "عثمان بن عفان", "علي بن أبي طالب"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 24,
+        "question": "ماذا يُسن للمسلم أن يقول عند الإفطار؟",
+        "options": ["الحمد لله", "ذهب الظمأ وابتلت العروق", "بسم الله", "الله أكبر"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 25,
+        "question": "ليلة القدر خير من كم شهر؟",
+        "options": ["مئة شهر", "ألف شهر", "خمسمئة شهر", "ألف ليلة"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 26,
+        "question": "ما هو الشهر الذي يأتي بعد رمضان مباشرة؟",
+        "options": ["شعبان", "شوال", "ذو القعدة", "محرم"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 27,
+        "question": "ما هو عيد المسلمين الذي يأتي بعد رمضان؟",
+        "options": ["عيد الأضحى", "عيد الفطر", "عيد الغدير", "عيد النصر"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 28,
+        "question": "كم عدد أيام صيام شهر رمضان؟",
+        "options": ["28 يوم", "29 أو 30 يوم", "30 يوم فقط", "31 يوم"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 29,
+        "question": "ما هو السحور الذي أوصى به النبي ﷺ؟",
+        "options": ["اللحم", "التمر", "الخبز", "الماء فقط"],
+        "correct": 1,
+        "points": 20
+    },
+    {
+        "day": 30,
+        "question": "بماذا وصف النبي ﷺ شهر رمضان؟",
+        "options": ["شهر الصبر", "شهر البركة", "شهر المغفرة", "كل ما سبق"],
+        "correct": 3,
+        "points": 20
+    }
+]
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="انتهت صلاحية التوكن")
     except jwt.JWTError:
