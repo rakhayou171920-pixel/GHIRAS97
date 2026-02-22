@@ -88,8 +88,8 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-6 text-white text-center" dir="rtl">
         <span className="text-5xl block mb-4">🌙</span>
         <h3 className="text-xl font-bold mb-2">مسابقة رمضان</h3>
-        <p className="text-blue-100">ستبدأ المسابقة في أول يوم من رمضان</p>
-        <p className="text-blue-200 text-sm mt-2">ترقبوا 15 سؤال مع جوائز نقاط!</p>
+        <p className="text-blue-100">ستبدا المسابقة في اول يوم من رمضان</p>
+        <p className="text-blue-200 text-sm mt-2">ترقبوا 15 سؤال مع جوائز نقاط</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
       <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white text-center" dir="rtl">
         <span className="text-5xl block mb-4">🎉</span>
         <h3 className="text-xl font-bold mb-2">مسابقة رمضان</h3>
-        <p className="text-green-100">{question?.message || "شكراً لمشاركتك في المسابقة!"}</p>
+        <p className="text-green-100">{question?.message || "شكرا لمشاركتك في المسابقة"}</p>
       </div>
     );
   }
