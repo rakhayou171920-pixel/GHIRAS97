@@ -231,7 +231,7 @@ async def get_today_ramadan_question():
     if ramadan_day == 0:
         return {
             "status": "not_started",
-            "message": "لم تبدأ مسابقة رمضان بعد",
+            "message": "لم تبدا مسابقة رمضان بعد",
             "start_date": RAMADAN_START_DATE.strftime("%Y-%m-%d")
         }
     
@@ -246,7 +246,7 @@ async def get_today_ramadan_question():
     if ramadan_day > 15:
         return {
             "status": "completed",
-            "message": "انتهت أسئلة المسابقة! شكراً لمشاركتك 🎉"
+            "message": "انتهت اسئلة المسابقة شكرا لمشاركتك"
         }
     
     question_data = RAMADAN_QUESTIONS[ramadan_day - 1]
