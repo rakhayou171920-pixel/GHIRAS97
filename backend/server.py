@@ -300,7 +300,7 @@ async def answer_ramadan_quiz(student_id: str, answer: int):
         "correct": is_correct,
         "points_earned": points_earned,
         "correct_answer": question_data["correct"],
-        "message": "أحسنت! إجابة صحيحة 🎉" if is_correct else "إجابة خاطئة، حاول غداً 💪"
+        "message": "احسنت اجابة صحيحة" if is_correct else "اجابة خاطئة حاول غدا"
     }
 
 
