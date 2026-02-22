@@ -121,10 +121,10 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
         
         <div className="bg-white/20 rounded-xl p-4 text-center">
           <span className="text-5xl block mb-3">✅</span>
-          <p className="text-lg font-semibold">لقد أجبت على سؤال اليوم!</p>
-          <p className="text-green-100 text-sm mt-2">عُد غداً للسؤال الجديد إن شاء الله</p>
+          <p className="text-lg font-semibold">لقد اجبت على سؤال اليوم</p>
+          <p className="text-green-100 text-sm mt-2">عد غدا للسؤال الجديد ان شاء الله</p>
           <div className="mt-3 bg-white/20 rounded-lg px-4 py-2 inline-block">
-            <span className="text-sm">أجبت على {status.total_answered} من 15 سؤال</span>
+            <span className="text-sm">اجبت على {status.total_answered} من 15 سؤال</span>
           </div>
         </div>
       </div>
