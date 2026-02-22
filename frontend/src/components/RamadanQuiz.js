@@ -145,7 +145,7 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
         
         <div className="bg-white/20 rounded-xl p-6 text-center">
           <span className="text-6xl block mb-4">{result.correct ? '🎉' : '😔'}</span>
-          <p className="text-2xl font-bold mb-2">{result.message}</p>
+          <p className="text-2xl font-bold mb-2">{result.correct ? 'احسنت اجابة صحيحة' : 'اجابة خاطئة حاول غدا'}</p>
           
           {result.correct && (
             <div className="bg-white/20 rounded-lg px-6 py-3 inline-block mt-2">
@@ -155,12 +155,12 @@ function RamadanQuiz({ studentId, onPointsEarned }) {
           
           {!result.correct && (
             <div className="mt-4 bg-white/20 rounded-lg p-3">
-              <p className="text-sm mb-1">الإجابة الصحيحة:</p>
+              <p className="text-sm mb-1">الاجابة الصحيحة:</p>
               <p className="font-bold">{question.options[result.correct_answer]}</p>
             </div>
           )}
           
-          <p className="text-sm opacity-80 mt-4">عُد غداً للسؤال الجديد!</p>
+          <p className="text-sm opacity-80 mt-4">عد غدا للسؤال الجديد</p>
         </div>
       </div>
     );
