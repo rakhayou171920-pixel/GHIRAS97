@@ -22,8 +22,8 @@ function StudentProfilePublic() {
       const profileRes = await axios.get(`${API}/students/${studentId}/profile`);
       setProfileData(profileRes.data);
 
-      // Fetch all students to get top 10
-      const studentsRes = await axios.get(`${API}/students`);
+      // Fetch all students to get top 10 (lite mode for performance)
+      const studentsRes = await axios.get(`${API}/students?lite=true`);
       const sorted = studentsRes.data.sort((a, b) => b.points - a.points);
       setTopStudents(sorted.slice(0, 10));
 

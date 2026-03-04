@@ -36,7 +36,7 @@ function Dashboard() {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get(`${API}/students`);
+      const response = await axios.get(`${API}/students?lite=true`);
       setStudents(response.data);
       
       // Extract unique supervisors
@@ -312,7 +312,7 @@ function Dashboard() {
                 <h2 className="text-2xl font-bold flex items-center gap-3">
                   <span>👨‍🏫</span>
                   <span>المشرف: {supervisor}</span>
-                  <span className="mr-auto bg-white ${color.text} px-4 py-1 rounded-full text-sm">
+                  <span className={`mr-auto bg-white ${color.text} px-4 py-1 rounded-full text-sm`}>
                     {supervisorStudents.length} طالب
                   </span>
                 </h2>
@@ -321,7 +321,7 @@ function Dashboard() {
               {/* Students Grid */}
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {supervisorStudents.map((student, studentIdx) => (
-                  <div key={student.id} className="bg-white rounded-xl shadow-lg p-4 border-2 ${color.border}">
+                  <div key={student.id} className={`bg-white rounded-xl shadow-lg p-4 border-2 ${color.border}`}>
                     {/* Rank Badge */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-2xl">
@@ -338,7 +338,7 @@ function Dashboard() {
                     {/* Student Info */}
                     <div className="flex items-center gap-3 mb-3">
                       {student.image_url ? (
-                        <img src={student.image_url} alt={student.name} className="w-12 h-12 rounded-full object-cover border-2 ${color.border}" />
+                        <img src={student.image_url} alt={student.name} className={`w-12 h-12 rounded-full object-cover border-2 ${color.border}`} />
                       ) : (
                         <div className={`w-12 h-12 rounded-full ${color.badge} flex items-center justify-center text-white text-xl font-bold`}>
                           {student.name.charAt(0)}

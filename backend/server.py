@@ -355,14 +355,22 @@ async def add_student(input: StudentCreate):
     return student
 
 @api_router.get("/students", response_model=List[Student])
-async def get_students():
+async def get_students(lite: bool = False):
     """جلب كل الطلاب مرتبين حسب النقاط"""
-    students = await db.students.find({}, {"_id": 0}).to_list(1000)
+    # In lite mode, exclude heavy image_url data for faster loading
+    projection = {"_id": 0}
+    if lite:
+        projection["image_url"] = 0
+    
+    students = await db.students.find({}, projection).to_list(1000)
     
     # Convert ISO string timestamps back to datetime
     for student in students:
         if isinstance(student.get('created_at'), str):
             student['created_at'] = datetime.fromisoformat(student['created_at'])
+        # Ensure image_url key exists in lite mode
+        if lite and 'image_url' not in student:
+            student['image_url'] = None
     
     # Sort by points descending
     students.sort(key=lambda x: x['points'], reverse=True)
