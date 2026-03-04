@@ -36,7 +36,7 @@ function Dashboard() {
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get(`${API}/students?lite=true`);
+      const response = await axios.get(`${API}/students`);
       setStudents(response.data);
       
       // Extract unique supervisors
