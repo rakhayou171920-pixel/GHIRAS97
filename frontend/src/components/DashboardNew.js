@@ -188,6 +188,7 @@ function Dashboard() {
         <div className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white py-3 px-4">
           <div className="container mx-auto flex items-center justify-center gap-3 text-center">
             <span className="text-xl">&#9733;</span>
+            {leagueStar.image_url && <img src={leagueStar.image_url} alt="" className="w-8 h-8 rounded-full object-cover border-2 border-white/40" />}
             <span className="font-bold">نجم الدوري: {leagueStar.student_name}</span>
             <span className="text-yellow-100 text-sm">- {leagueStar.reason}</span>
           </div>

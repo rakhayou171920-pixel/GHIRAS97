@@ -120,7 +120,12 @@ function StudentProfilePublic() {
           <div className="bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl p-4 text-center text-white shadow-lg" data-testid="league-star-banner">
             <div className="text-3xl">&#9733;</div>
             <p className="text-sm opacity-80">نجم الدوري</p>
-            <p className="text-xl font-bold">{leagueStar.student_name}</p>
+            {leagueStar.image_url ? (
+              <img src={leagueStar.image_url} alt="" className="w-16 h-16 rounded-full object-cover border-4 border-white/40 mx-auto mt-1 shadow-lg" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold mx-auto mt-1">{leagueStar.student_name?.charAt(0)}</div>
+            )}
+            <p className="text-xl font-bold mt-1">{leagueStar.student_name}</p>
             <p className="text-yellow-100 text-xs">{leagueStar.reason}</p>
           </div>
         )}

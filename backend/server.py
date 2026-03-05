@@ -168,11 +168,15 @@ class TaskCreate(BaseModel):
 class MatchCreate(BaseModel):
     team1: str
     team2: str
+
+class MatchUpdateScore(BaseModel):
     score1: int
     score2: int
 
 class LeagueStarCreate(BaseModel):
+    student_id: str
     student_name: str
+    image_url: Optional[str] = None
     reason: str
 
 class ViewerLinkCreate(BaseModel):
@@ -517,13 +521,22 @@ async def create_match(data: MatchCreate):
         "id": str(uuid.uuid4()),
         "team1": data.team1,
         "team2": data.team2,
-        "score1": data.score1,
-        "score2": data.score2,
+        "score1": None,
+        "score2": None,
+        "played": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.matches.insert_one(match)
     match.pop("_id", None)
     return match
+
+
+@api_router.put("/matches/{match_id}/score")
+async def update_match_score(match_id: str, data: MatchUpdateScore):
+    result = await db.matches.update_one({"id": match_id}, {"$set": {"score1": data.score1, "score2": data.score2, "played": True}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="المباراة غير موجودة")
+    return {"message": "تم تحديث النتيجة"}
 
 
 @api_router.get("/matches")
@@ -542,15 +555,22 @@ async def delete_match(match_id: str):
 
 @api_router.get("/league-standings")
 async def get_league_standings():
-    matches = await db.matches.find({}, {"_id": 0}).to_list(1000)
+    matches = await db.matches.find({"played": True}, {"_id": 0}).to_list(1000)
     standings = {}
-    for m in matches:
-        for team in [m["team1"], m["team2"]]:
-            if team not in standings:
-                standings[team] = {"team": team, "played": 0, "won": 0, "drawn": 0, "lost": 0, "gf": 0, "ga": 0, "gd": 0, "points": 0}
+    
+    # Initialize all teams from supervisors
+    students = await db.students.find({}, {"_id": 0, "supervisor": 1}).to_list(1000)
+    all_teams = set([s['supervisor'] for s in students if s.get('supervisor')])
+    for team in all_teams:
+        standings[team] = {"team": team, "played": 0, "won": 0, "drawn": 0, "lost": 0, "gf": 0, "ga": 0, "gd": 0, "points": 0}
 
+    for m in matches:
         t1, t2 = m["team1"], m["team2"]
         s1, s2 = m["score1"], m["score2"]
+        
+        for team in [t1, t2]:
+            if team not in standings:
+                standings[team] = {"team": team, "played": 0, "won": 0, "drawn": 0, "lost": 0, "gf": 0, "ga": 0, "gd": 0, "points": 0}
 
         standings[t1]["played"] += 1
         standings[t2]["played"] += 1
@@ -585,7 +605,9 @@ async def get_league_standings():
 async def set_league_star(data: LeagueStarCreate):
     star = {
         "id": str(uuid.uuid4()),
+        "student_id": data.student_id,
         "student_name": data.student_name,
+        "image_url": data.image_url,
         "reason": data.reason,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -629,7 +651,7 @@ async def create_viewer_link(data: ViewerLinkCreate):
 
 
 @api_router.get("/viewer-links")
-async def get_viewer_links(user: str = Depends(get_current_user)):
+async def get_viewer_links():
     links = await db.viewer_links.find({}, {"_id": 0}).to_list(100)
     return links
 
