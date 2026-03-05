@@ -365,18 +365,6 @@ async def upload_student_image(student_id: str, file: UploadFile = File(...), us
     return {"image_url": image_url, "message": "تم رفع الصورة بنجاح"}
 
 
-# ==================== Bulk Points ====================
-@api_router.put("/students/bulk-points")
-async def bulk_update_points(data: BulkPointsUpdate, user: str = Depends(get_current_user)):
-    students = await db.students.find({"supervisor": data.group}, {"_id": 0, "id": 1, "name": 1}).to_list(1000)
-    if not students:
-        raise HTTPException(status_code=404, detail="لا يوجد طلاب في هذه المجموعة")
-    await db.students.update_many({"supervisor": data.group}, {"$inc": {"points": data.points}})
-    for s in students:
-        await log_points(s["id"], s["name"], data.points, data.reason)
-    return {"message": f"تم تحديث نقاط {len(students)} طالب", "count": len(students)}
-
-
 # ==================== Points Log ====================
 @api_router.get("/points-log/{student_id}")
 async def get_points_log(student_id: str):
