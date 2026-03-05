@@ -5,7 +5,8 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function ChallengesManager() {
+function ChallengesManager({ token }) {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -35,7 +36,7 @@ function ChallengesManager() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/challenges`, newChallenge);
+      await axios.post(`${API}/challenges`, newChallenge, { headers });
       setNewChallenge({
         question: "",
         options: ["", "", "", ""],
@@ -55,7 +56,7 @@ function ChallengesManager() {
 
   const toggleChallenge = async (challengeId) => {
     try {
-      await axios.put(`${API}/challenges/${challengeId}/toggle`);
+      await axios.put(`${API}/challenges/${challengeId}/toggle`, {}, { headers });
       showMessage("تم تحديث حالة المنافسة");
       await fetchChallenges();
     } catch (error) {
@@ -67,7 +68,7 @@ function ChallengesManager() {
     if (!window.confirm("هل أنت متأكد من حذف هذه المنافسة؟")) return;
     
     try {
-      await axios.delete(`${API}/challenges/${challengeId}`);
+      await axios.delete(`${API}/challenges/${challengeId}`, { headers });
       showMessage("تم حذف المنافسة بنجاح");
       await fetchChallenges();
     } catch (error) {
