@@ -187,6 +187,12 @@ class BulkPointsUpdate(BaseModel):
     points: int
     reason: str
 
+class GroupCreate(BaseModel):
+    name: str
+
+class GroupUpdate(BaseModel):
+    name: str
+
 
 # ==================== Helper ====================
 def fix_datetime(doc):
@@ -670,6 +676,58 @@ async def get_viewer_data(token: str):
     if not link:
         raise HTTPException(status_code=404, detail="رابط غير صالح")
     return {"name": link["name"], "valid": True}
+
+
+# ==================== Groups ====================
+@api_router.post("/groups")
+async def create_group(data: GroupCreate):
+    existing = await db.groups.find_one({"name": data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="المجموعة موجودة بالفعل")
+    group = {
+        "id": str(uuid.uuid4()),
+        "name": data.name,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.groups.insert_one(group)
+    group.pop("_id", None)
+    return group
+
+
+@api_router.get("/groups")
+async def get_groups():
+    groups = await db.groups.find({}, {"_id": 0}).to_list(1000)
+    # Also count students per group
+    for g in groups:
+        count = await db.students.count_documents({"supervisor": g["name"]})
+        g["student_count"] = count
+    return groups
+
+
+@api_router.put("/groups/{group_id}")
+async def update_group(group_id: str, data: GroupUpdate):
+    old_group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if not old_group:
+        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+    # Update group name
+    await db.groups.update_one({"id": group_id}, {"$set": {"name": data.name}})
+    # Update all students in this group
+    if old_group["name"] != data.name:
+        await db.students.update_many({"supervisor": old_group["name"]}, {"$set": {"supervisor": data.name}})
+        # Update tasks too
+        await db.tasks.update_many({"group": old_group["name"]}, {"$set": {"group": data.name}})
+    return {"message": "تم تحديث المجموعة"}
+
+
+@api_router.delete("/groups/{group_id}")
+async def delete_group(group_id: str):
+    group = await db.groups.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="المجموعة غير موجودة")
+    # Remove group from students
+    await db.students.update_many({"supervisor": group["name"]}, {"$set": {"supervisor": None}})
+    await db.groups.delete_one({"id": group_id})
+    return {"message": "تم حذف المجموعة", "deleted": True}
 
 
 # ==================== Supervisors ====================

@@ -7,6 +7,7 @@ import FootballLeague from "./FootballLeague";
 import TasksManager from "./TasksManager";
 import LeagueStarManager from "./LeagueStarManager";
 import ViewerLinksManager from "./ViewerLinksManager";
+import GroupsManager from "./GroupsManager";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -26,7 +27,7 @@ function Dashboard() {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showBulkPoints, setShowBulkPoints] = useState(false);
-  const [activeSection, setActiveSection] = useState("students");
+  const [activeSection, setActiveSection] = useState("groups");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [leagueStar, setLeagueStar] = useState(null);
@@ -56,10 +57,12 @@ function Dashboard() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/students`);
-      setStudents(res.data);
-      const sups = [...new Set(res.data.map(s => s.supervisor).filter(Boolean))];
-      setSupervisors(sups);
+      const [studentsRes, groupsRes] = await Promise.all([
+        axios.get(`${API}/students`),
+        axios.get(`${API}/groups`)
+      ]);
+      setStudents(studentsRes.data);
+      setSupervisors(groupsRes.data.map(g => g.name));
     } catch {
       showMsg("خطأ في جلب البيانات");
     }
@@ -159,6 +162,7 @@ function Dashboard() {
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
   const sections = [
+    { id: "groups", label: "المجموعات", icon: "🏅" },
     { id: "students", label: "الطلاب", icon: "👥" },
     { id: "tasks", label: "المهام", icon: "📋" },
     { id: "league", label: "الدوري", icon: "⚽" },
@@ -217,6 +221,9 @@ function Dashboard() {
             </button>
           ))}
         </div>
+
+        {/* ===== Groups Section ===== */}
+        {activeSection === "groups" && <GroupsManager onGroupsChange={(names) => setSupervisors(names)} />}
 
         {/* ===== Students Section ===== */}
         {activeSection === "students" && (
@@ -352,11 +359,12 @@ function Dashboard() {
                 <input type="text" value={newPhone} onChange={e => setNewPhone(e.target.value)} className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-green-500" placeholder="05xxxxxxxx" data-testid="new-student-phone" />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">المجموعة</label>
-                <input type="text" value={newSupervisor} onChange={e => setNewSupervisor(e.target.value)} className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-green-500" placeholder="اسم المجموعة" list="supervisors-list" data-testid="new-student-supervisor" />
-                <datalist id="supervisors-list">
-                  {supervisors.map(s => <option key={s} value={s} />)}
-                </datalist>
+                <label className="block text-sm font-semibold mb-1">المجموعة *</label>
+                <select value={newSupervisor} onChange={e => setNewSupervisor(e.target.value)} className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-green-500" required data-testid="new-student-supervisor">
+                  <option value="">اختر المجموعة</option>
+                  {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                {supervisors.length === 0 && <p className="text-xs text-red-500 mt-1">⚠️ أضف مجموعة أولاً من قسم المجموعات</p>}
               </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={loading} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold disabled:opacity-50" data-testid="submit-add-student">
@@ -385,10 +393,10 @@ function Dashboard() {
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1">المجموعة</label>
-                <input type="text" value={editSupervisor} onChange={e => setEditSupervisor(e.target.value)} className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-green-500" list="supervisors-edit-list" />
-                <datalist id="supervisors-edit-list">
-                  {supervisors.map(s => <option key={s} value={s} />)}
-                </datalist>
+                <select value={editSupervisor} onChange={e => setEditSupervisor(e.target.value)} className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-green-500">
+                  <option value="">بدون مجموعة</option>
+                  {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={loading} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold disabled:opacity-50">تحديث</button>
