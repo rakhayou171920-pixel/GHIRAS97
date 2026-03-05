@@ -159,11 +159,11 @@ function Dashboard() {
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
   const sections = [
-    { id: "students", label: "الطلاب", icon: "&#128100;" },
-    { id: "tasks", label: "المهام", icon: "&#128203;" },
-    { id: "league", label: "الدوري", icon: "&#9917;" },
-    { id: "star", label: "نجم الدوري", icon: "&#9733;" },
-    { id: "viewers", label: "روابط المشاهدة", icon: "&#128279;" },
+    { id: "students", label: "الطلاب", icon: "👥" },
+    { id: "tasks", label: "المهام", icon: "📋" },
+    { id: "league", label: "الدوري", icon: "⚽" },
+    { id: "star", label: "نجم الدوري", icon: "⭐" },
+    { id: "viewers", label: "روابط المشاهدة", icon: "🔗" },
   ];
 
   return (
@@ -173,11 +173,11 @@ function Dashboard() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">نادي غِراس</h1>
-              <p className="text-green-100 text-sm">لوحة تحكم المشرف</p>
+              <h1 className="text-2xl font-bold">🌱 نادي غِراس</h1>
+              <p className="text-green-100 text-sm">🎯 لوحة تحكم المشرف</p>
             </div>
             <div className="flex gap-2">
-              <Link to="/challenges" className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="challenges-link">المنافسات</Link>
+              <Link to="/challenges" className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="challenges-link">🏆 المنافسات</Link>
             </div>
           </div>
         </div>
@@ -187,10 +187,10 @@ function Dashboard() {
       {leagueStar && (
         <div className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white py-3 px-4">
           <div className="container mx-auto flex items-center justify-center gap-3 text-center">
-            <span className="text-xl">&#9733;</span>
+            <span className="text-xl">⭐</span>
             {leagueStar.image_url && <img src={leagueStar.image_url} alt="" className="w-8 h-8 rounded-full object-cover border-2 border-white/40" />}
             <span className="font-bold">نجم الدوري: {leagueStar.student_name}</span>
-            <span className="text-yellow-100 text-sm">- {leagueStar.reason}</span>
+            <span className="text-yellow-100 text-sm">✨ {leagueStar.reason}</span>
           </div>
         </div>
       )}
@@ -213,7 +213,7 @@ function Dashboard() {
               className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeSection === s.id ? "bg-green-600 text-white shadow-lg" : "bg-white text-gray-600 shadow hover:bg-gray-50"}`}
               data-testid={`section-${s.id}`}
             >
-              <span dangerouslySetInnerHTML={{ __html: s.icon }} /> {s.label}
+              {s.icon} {s.label}
             </button>
           ))}
         </div>
@@ -223,24 +223,27 @@ function Dashboard() {
           <div className="space-y-4">
             {/* Action Buttons */}
             <div className="flex gap-2 flex-wrap">
-              <button onClick={() => setShowAddStudent(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="add-student-btn">+ إضافة طالب</button>
-              <button onClick={() => setShowQRModal(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="qr-codes-btn">QR رموز</button>
-              <button onClick={() => setShowBulkPoints(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="bulk-points-btn">نقاط جماعية</button>
+              <button onClick={() => setShowAddStudent(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="add-student-btn">➕ إضافة طالب</button>
+              <button onClick={() => setShowQRModal(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="qr-codes-btn">📱 رموز QR</button>
+              <button onClick={() => setShowBulkPoints(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="bulk-points-btn">💎 نقاط جماعية</button>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white rounded-xl p-3 text-center shadow">
+              <div className="bg-white rounded-xl p-3 text-center shadow-lg border border-green-100">
+                <p className="text-xl">👥</p>
                 <div className="text-xl font-bold text-green-600">{students.length}</div>
-                <div className="text-xs text-gray-600">طالب</div>
+                <div className="text-xs text-gray-500">طالب</div>
               </div>
-              <div className="bg-white rounded-xl p-3 text-center shadow">
+              <div className="bg-white rounded-xl p-3 text-center shadow-lg border border-blue-100">
+                <p className="text-xl">💎</p>
                 <div className="text-xl font-bold text-blue-600">{students.reduce((a, s) => a + s.points, 0)}</div>
-                <div className="text-xs text-gray-600">مجموع النقاط</div>
+                <div className="text-xs text-gray-500">مجموع النقاط</div>
               </div>
-              <div className="bg-white rounded-xl p-3 text-center shadow">
+              <div className="bg-white rounded-xl p-3 text-center shadow-lg border border-purple-100">
+                <p className="text-xl">🏅</p>
                 <div className="text-xl font-bold text-purple-600">{supervisors.length}</div>
-                <div className="text-xs text-gray-600">مجموعة</div>
+                <div className="text-xs text-gray-500">مجموعة</div>
               </div>
             </div>
 
@@ -251,7 +254,7 @@ function Dashboard() {
               return (
                 <div key={sup} className="bg-white rounded-xl shadow-lg overflow-hidden">
                   <div className={`bg-gradient-to-r ${color.gradient} text-white p-3 flex items-center justify-between`}>
-                    <h3 className="font-bold">{sup}</h3>
+                    <h3 className="font-bold">🏅 {sup}</h3>
                     <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm">{groupStudents.length} طالب</span>
                   </div>
                   <div className="p-3 space-y-2">
@@ -279,7 +282,7 @@ function Dashboard() {
                         </div>
 
                         {/* Points */}
-                        <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-sm font-bold">{student.points}</span>
+                        <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-2 py-0.5 rounded-full text-sm font-bold">{student.points} ⭐</span>
 
                         {/* Actions */}
                         <div className="flex gap-1">

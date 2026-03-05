@@ -61,9 +61,9 @@ function TasksManager({ supervisors }) {
   const filteredTasks = filter === "all" ? tasks : tasks.filter(t => t.group === filter);
 
   const getStatusBadge = (task) => {
-    if (task.completed) return <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">مكتملة</span>;
-    if (task.claimed_by) return <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">محجوزة</span>;
-    return <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">متاحة</span>;
+    if (task.completed) return <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">✅ مكتملة</span>;
+    if (task.claimed_by) return <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">🔒 محجوزة</span>;
+    return <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">📌 متاحة</span>;
   };
 
   const getDaysLeft = (expiresAt) => {
@@ -84,7 +84,7 @@ function TasksManager({ supervisors }) {
             <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1 rounded-full text-sm font-semibold ${filter === s ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700"}`}>{s}</button>
           ))}
         </div>
-        <button onClick={() => setShowAdd(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="add-task-btn">+ مهمة جديدة</button>
+        <button onClick={() => setShowAdd(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold" data-testid="add-task-btn">📌 مهمة جديدة</button>
       </div>
 
       <div className="space-y-3">
@@ -99,14 +99,14 @@ function TasksManager({ supervisors }) {
                 </div>
                 <p className="font-semibold text-gray-800">{task.description}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-sm font-bold">{task.points} نقطة</span>
-                  {task.claimed_by_name && <span className="text-sm text-gray-600">حجزها: {task.claimed_by_name}</span>}
+                  <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-sm font-bold">💎 {task.points} نقطة</span>
+                  {task.claimed_by_name && <span className="text-sm text-gray-600">👤 حجزها: {task.claimed_by_name}</span>}
                 </div>
               </div>
               <div className="flex gap-2">
                 {task.claimed_by && !task.completed && (
                   <button onClick={() => completeTask(task.id)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold" data-testid={`complete-task-${task.id}`}>
-                    اعتماد
+                    ✅ اعتماد
                   </button>
                 )}
                 <button onClick={() => deleteTask(task.id)} className="text-red-400 hover:text-red-600 text-lg">&#10005;</button>

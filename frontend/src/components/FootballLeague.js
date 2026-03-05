@@ -83,23 +83,23 @@ function FootballLeague({ supervisors }) {
 
       {/* Tabs */}
       <div className="flex gap-2">
-        <button onClick={() => setActiveTab("standings")} className={`flex-1 py-2 rounded-lg font-bold text-sm ${activeTab === "standings" ? "bg-green-600 text-white" : "bg-white text-gray-600 shadow"}`}>جدول الترتيب</button>
+        <button onClick={() => setActiveTab("standings")} className={`flex-1 py-2 rounded-lg font-bold text-sm ${activeTab === "standings" ? "bg-green-600 text-white" : "bg-white text-gray-600 shadow"}`}>🏆 جدول الترتيب</button>
         <button onClick={() => setActiveTab("pending")} className={`flex-1 py-2 rounded-lg font-bold text-sm relative ${activeTab === "pending" ? "bg-blue-600 text-white" : "bg-white text-gray-600 shadow"}`}>
-          المباريات القادمة
+          📅 المباريات القادمة
           {pendingMatches.length > 0 && <span className="absolute -top-1 -left-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">{pendingMatches.length}</span>}
         </button>
-        <button onClick={() => setActiveTab("played")} className={`flex-1 py-2 rounded-lg font-bold text-sm ${activeTab === "played" ? "bg-gray-600 text-white" : "bg-white text-gray-600 shadow"}`}>النتائج</button>
+        <button onClick={() => setActiveTab("played")} className={`flex-1 py-2 rounded-lg font-bold text-sm ${activeTab === "played" ? "bg-gray-600 text-white" : "bg-white text-gray-600 shadow"}`}>📊 النتائج</button>
       </div>
 
       <button onClick={() => setShowAddMatch(true)} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm" data-testid="add-match-btn">
-        + جدولة مباراة جديدة
+        ⚽ جدولة مباراة جديدة
       </button>
 
       {/* Standings Tab */}
       {activeTab === "standings" && (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-3">
-            <h2 className="font-bold text-center">جدول الدوري</h2>
+            <h2 className="font-bold text-center">⚽ جدول الدوري</h2>
           </div>
           {standings.length > 0 ? (
             <div className="overflow-x-auto">
@@ -121,7 +121,7 @@ function FootballLeague({ supervisors }) {
                 <tbody>
                   {standings.map((t, i) => (
                     <tr key={t.team} className={i === 0 ? "bg-yellow-50 font-bold" : i % 2 === 0 ? "bg-gray-50" : ""}>
-                      <td className="p-2 text-center">{i + 1}</td>
+                      <td className="p-2 text-center">{i === 0 ? "🥇" : i + 1}</td>
                       <td className="p-2 font-semibold">{t.team}</td>
                       <td className="p-2 text-center">{t.played}</td>
                       <td className="p-2 text-center text-green-600">{t.won}</td>
@@ -150,7 +150,7 @@ function FootballLeague({ supervisors }) {
               <div className="flex items-center justify-between">
                 <div className="flex-1 flex items-center justify-center gap-3">
                   <span className="font-bold text-gray-800 text-sm">{m.team1}</span>
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold text-sm">VS</span>
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold text-sm">⚡ VS</span>
                   <span className="font-bold text-gray-800 text-sm">{m.team2}</span>
                 </div>
                 <div className="flex gap-2">
