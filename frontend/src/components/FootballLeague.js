@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-function FootballLeague({ token, supervisors }) {
+function FootballLeague({ supervisors }) {
   const [matches, setMatches] = useState([]);
   const [standings, setStandings] = useState([]);
   const [showAddMatch, setShowAddMatch] = useState(false);
@@ -14,7 +14,7 @@ function FootballLeague({ token, supervisors }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {};
 
   const fetchData = async () => {
     try {

@@ -5,8 +5,8 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function ChallengesManager({ token }) {
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+function ChallengesManager() {
+  const headers = {};
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);

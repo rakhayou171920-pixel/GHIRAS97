@@ -4,7 +4,7 @@ import axios from "axios";
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-function ViewerLinksManager({ token }) {
+function ViewerLinksManager() {
   const [links, setLinks] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
@@ -12,7 +12,7 @@ function ViewerLinksManager({ token }) {
   const [message, setMessage] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {};
 
   const fetchLinks = async () => {
     try {

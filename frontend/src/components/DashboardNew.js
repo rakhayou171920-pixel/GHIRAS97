@@ -19,7 +19,7 @@ const SUPERVISOR_COLORS = [
   { bg: "bg-teal-100", text: "text-teal-700", border: "border-teal-400", gradient: "from-teal-500 to-teal-600" },
 ];
 
-function Dashboard({ token, onLogout }) {
+function Dashboard() {
   const [students, setStudents] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -47,7 +47,7 @@ function Dashboard({ token, onLogout }) {
   const [editPhone, setEditPhone] = useState("");
   const [editSupervisor, setEditSupervisor] = useState("");
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {};
 
   const showMsg = (msg) => {
     setMessage(msg);
@@ -178,7 +178,6 @@ function Dashboard({ token, onLogout }) {
             </div>
             <div className="flex gap-2">
               <Link to="/challenges" className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="challenges-link">المنافسات</Link>
-              <button onClick={onLogout} className="bg-red-500/80 hover:bg-red-600 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="logout-btn">خروج</button>
             </div>
           </div>
         </div>
@@ -315,16 +314,16 @@ function Dashboard({ token, onLogout }) {
         )}
 
         {/* ===== Tasks Section ===== */}
-        {activeSection === "tasks" && <TasksManager token={token} supervisors={supervisors} />}
+        {activeSection === "tasks" && <TasksManager supervisors={supervisors} />}
 
         {/* ===== League Section ===== */}
-        {activeSection === "league" && <FootballLeague token={token} supervisors={supervisors} />}
+        {activeSection === "league" && <FootballLeague supervisors={supervisors} />}
 
         {/* ===== Star Section ===== */}
-        {activeSection === "star" && <LeagueStarManager token={token} />}
+        {activeSection === "star" && <LeagueStarManager />}
 
         {/* ===== Viewers Section ===== */}
-        {activeSection === "viewers" && <ViewerLinksManager token={token} />}
+        {activeSection === "viewers" && <ViewerLinksManager />}
       </div>
 
       {/* ===== Modals ===== */}

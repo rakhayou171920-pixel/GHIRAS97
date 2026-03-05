@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-function TasksManager({ token, supervisors }) {
+function TasksManager({ supervisors }) {
   const [tasks, setTasks] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [group, setGroup] = useState("");
@@ -13,7 +13,7 @@ function TasksManager({ token, supervisors }) {
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("all");
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {};
 
   const fetchTasks = async () => {
     try {

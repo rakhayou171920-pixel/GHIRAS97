@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-function LeagueStarManager({ token }) {
+function LeagueStarManager() {
   const [stars, setStars] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [studentName, setStudentName] = useState("");
@@ -11,7 +11,7 @@ function LeagueStarManager({ token }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {};
 
   const fetchStars = async () => {
     try {

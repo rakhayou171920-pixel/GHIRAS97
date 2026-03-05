@@ -263,7 +263,7 @@ async def get_ramadan_quiz_status(student_id: str):
 
 # ==================== Students ====================
 @api_router.post("/students", response_model=Student)
-async def add_student(input: StudentCreate, user: str = Depends(get_current_user)):
+async def add_student(input: StudentCreate):
     student = Student(**input.model_dump())
     doc = student.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
@@ -287,7 +287,7 @@ async def get_students(lite: bool = False):
 
 # Bulk points must be BEFORE dynamic {student_id} routes to avoid route conflicts
 @api_router.put("/students/bulk-points")
-async def bulk_update_points(data: BulkPointsUpdate, user: str = Depends(get_current_user)):
+async def bulk_update_points(data: BulkPointsUpdate):
     students = await db.students.find({"supervisor": data.group}, {"_id": 0, "id": 1, "name": 1}).to_list(1000)
     if not students:
         raise HTTPException(status_code=404, detail="لا يوجد طلاب في هذه المجموعة")
@@ -298,7 +298,7 @@ async def bulk_update_points(data: BulkPointsUpdate, user: str = Depends(get_cur
 
 
 @api_router.put("/students/{student_id}", response_model=Student)
-async def update_student(student_id: str, update_data: StudentUpdate, user: str = Depends(get_current_user)):
+async def update_student(student_id: str, update_data: StudentUpdate):
     update_fields = {k: v for k, v in update_data.model_dump().items() if v is not None}
     if not update_fields:
         raise HTTPException(status_code=400, detail="لا توجد بيانات للتحديث")
@@ -310,7 +310,7 @@ async def update_student(student_id: str, update_data: StudentUpdate, user: str 
 
 
 @api_router.delete("/students/{student_id}")
-async def delete_student(student_id: str, user: str = Depends(get_current_user)):
+async def delete_student(student_id: str):
     result = await db.students.delete_one({"id": student_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
@@ -318,7 +318,7 @@ async def delete_student(student_id: str, user: str = Depends(get_current_user))
 
 
 @api_router.put("/students/{student_id}/points")
-async def update_points(student_id: str, points_data: PointsUpdate, user: str = Depends(get_current_user)):
+async def update_points(student_id: str, points_data: PointsUpdate):
     student = await db.students.find_one({"id": student_id}, {"_id": 0})
     if not student:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
@@ -329,7 +329,7 @@ async def update_points(student_id: str, points_data: PointsUpdate, user: str = 
 
 
 @api_router.put("/students/{student_id}/attendance")
-async def mark_attendance(student_id: str, user: str = Depends(get_current_user)):
+async def mark_attendance(student_id: str):
     student = await db.students.find_one({"id": student_id}, {"_id": 0})
     if not student:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
@@ -352,7 +352,7 @@ async def get_student_profile(student_id: str):
 
 
 @api_router.post("/students/{student_id}/upload-image")
-async def upload_student_image(student_id: str, file: UploadFile = File(...), user: str = Depends(get_current_user)):
+async def upload_student_image(student_id: str, file: UploadFile = File(...)):
     student = await db.students.find_one({"id": student_id}, {"_id": 0})
     if not student:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
@@ -377,7 +377,7 @@ async def get_points_log(student_id: str):
 
 # ==================== Challenges ====================
 @api_router.post("/challenges", response_model=Challenge)
-async def create_challenge(input: ChallengeCreate, user: str = Depends(get_current_user)):
+async def create_challenge(input: ChallengeCreate):
     challenge = Challenge(**input.model_dump())
     doc = challenge.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
@@ -420,7 +420,7 @@ async def answer_challenge(challenge_id: str, student_id: str, answer: Challenge
 
 
 @api_router.delete("/challenges/{challenge_id}")
-async def delete_challenge(challenge_id: str, user: str = Depends(get_current_user)):
+async def delete_challenge(challenge_id: str):
     result = await db.challenges.delete_one({"id": challenge_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="المنافسة غير موجودة")
@@ -428,7 +428,7 @@ async def delete_challenge(challenge_id: str, user: str = Depends(get_current_us
 
 
 @api_router.put("/challenges/{challenge_id}/toggle")
-async def toggle_challenge(challenge_id: str, user: str = Depends(get_current_user)):
+async def toggle_challenge(challenge_id: str):
     challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
     if not challenge:
         raise HTTPException(status_code=404, detail="المنافسة غير موجودة")
@@ -439,7 +439,7 @@ async def toggle_challenge(challenge_id: str, user: str = Depends(get_current_us
 
 # ==================== Tasks (Weekly) ====================
 @api_router.post("/tasks")
-async def create_task(data: TaskCreate, user: str = Depends(get_current_user)):
+async def create_task(data: TaskCreate):
     now = datetime.now(timezone.utc)
     task = {
         "id": str(uuid.uuid4()),
@@ -485,7 +485,7 @@ async def claim_task(task_id: str, student_id: str):
 
 
 @api_router.post("/tasks/{task_id}/complete")
-async def complete_task(task_id: str, user: str = Depends(get_current_user)):
+async def complete_task(task_id: str):
     task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
     if not task:
         raise HTTPException(status_code=404, detail="المهمة غير موجودة")
@@ -503,7 +503,7 @@ async def complete_task(task_id: str, user: str = Depends(get_current_user)):
 
 
 @api_router.delete("/tasks/{task_id}")
-async def delete_task(task_id: str, user: str = Depends(get_current_user)):
+async def delete_task(task_id: str):
     result = await db.tasks.delete_one({"id": task_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="المهمة غير موجودة")
@@ -512,7 +512,7 @@ async def delete_task(task_id: str, user: str = Depends(get_current_user)):
 
 # ==================== Football League ====================
 @api_router.post("/matches")
-async def create_match(data: MatchCreate, user: str = Depends(get_current_user)):
+async def create_match(data: MatchCreate):
     match = {
         "id": str(uuid.uuid4()),
         "team1": data.team1,
@@ -533,7 +533,7 @@ async def get_matches():
 
 
 @api_router.delete("/matches/{match_id}")
-async def delete_match(match_id: str, user: str = Depends(get_current_user)):
+async def delete_match(match_id: str):
     result = await db.matches.delete_one({"id": match_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="المباراة غير موجودة")
@@ -582,7 +582,7 @@ async def get_league_standings():
 
 # ==================== League Star ====================
 @api_router.post("/league-star")
-async def set_league_star(data: LeagueStarCreate, user: str = Depends(get_current_user)):
+async def set_league_star(data: LeagueStarCreate):
     star = {
         "id": str(uuid.uuid4()),
         "student_name": data.student_name,
@@ -607,7 +607,7 @@ async def get_all_league_stars():
 
 
 @api_router.delete("/league-star/{star_id}")
-async def delete_league_star(star_id: str, user: str = Depends(get_current_user)):
+async def delete_league_star(star_id: str):
     result = await db.league_star.delete_one({"id": star_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="غير موجود")
@@ -616,7 +616,7 @@ async def delete_league_star(star_id: str, user: str = Depends(get_current_user)
 
 # ==================== Viewer Links ====================
 @api_router.post("/viewer-links")
-async def create_viewer_link(data: ViewerLinkCreate, user: str = Depends(get_current_user)):
+async def create_viewer_link(data: ViewerLinkCreate):
     link = {
         "id": str(uuid.uuid4()),
         "name": data.name,
@@ -635,7 +635,7 @@ async def get_viewer_links(user: str = Depends(get_current_user)):
 
 
 @api_router.delete("/viewer-links/{link_id}")
-async def delete_viewer_link(link_id: str, user: str = Depends(get_current_user)):
+async def delete_viewer_link(link_id: str):
     result = await db.viewer_links.delete_one({"id": link_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="غير موجود")
