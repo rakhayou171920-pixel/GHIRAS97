@@ -23,6 +23,11 @@ db = client[os.environ.get("DB_NAME")]
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+# ⭐ هذا المسار مهم ليبقى السيرفر مستيقظ
+@app.get("/")
+async def home():
+    return {"status": "running", "service": "Ghiras Club API"}
+
 ADMIN_USERNAME = "ghiras2026"
 ADMIN_PASSWORD = "ghras2026"
 
@@ -113,9 +118,9 @@ async def add_points(student_id: str, points: int):
     await db.students.update_one({"id": student_id}, {"$inc": {"points": points}})
     return {"success": True}
 
-@api_router.get("/")
-async def root():
-    return {"message": "Ghiras Club API"}
+@api_router.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 app.include_router(api_router)
 
