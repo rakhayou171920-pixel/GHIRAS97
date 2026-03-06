@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-python-telegram-bot
-requests
-python-dotenv
-PyJWT
-motor
-passlib[bcrypt]
-bcrypt
