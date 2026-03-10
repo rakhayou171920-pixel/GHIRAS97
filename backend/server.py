@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, File, UploadFile, Depends, Header, Query
+from fastapi import FastAPI, APIRouter, HTTPException, File, UploadFile, Query
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,9 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-import jwt
-from datetime import datetime, timezone, timedelta, date
-from passlib.context import CryptContext
+from datetime import datetime, timezone, date
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -28,43 +26,7 @@ api_router = APIRouter(prefix="/api")
 async def home():
     return {"status": "running", "service": "Ghiras Club API"}
 
-ADMIN_USERNAME = "ghiras2026"
-ADMIN_PASSWORD = "ghras2026"
-
-JWT_SECRET = os.environ.get("JWT_SECRET", "secret")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_DAYS = 30
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def create_token(username: str):
-    payload = {
-        "sub": username,
-        "exp": datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS)
-    }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload.get("sub")
-    except:
-        return None
-
-async def get_current_user(authorization: Optional[str] = Header(None)):
-    if not authorization:
-        raise HTTPException(status_code=401, detail="غير مصرح")
-    token = authorization.split(" ")[1]
-    user = verify_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="جلسة منتهية")
-    return user
-
 # ==================== Pydantic Models ====================
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
 
 class Student(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -187,15 +149,6 @@ class RamadanQuizAnswer(BaseModel):
     question_id: str
     answer: int
     date: str = Field(default_factory=lambda: date.today().isoformat())
-
-# ==================== Auth Endpoints ====================
-
-@api_router.post("/auth/login")
-async def login(req: LoginRequest):
-    if req.username == ADMIN_USERNAME and req.password == ADMIN_PASSWORD:
-        token = create_token(req.username)
-        return {"token": token}
-    raise HTTPException(status_code=401, detail="بيانات غير صحيحة")
 
 # ==================== Student Endpoints ====================
 
