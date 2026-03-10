@@ -459,4 +459,4 @@ function DashboardNew() {
   );
 }
 
-export default Dashboard;
+export default DashboardNew;
