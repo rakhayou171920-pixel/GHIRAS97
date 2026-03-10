@@ -21,7 +21,7 @@ const SUPERVISOR_COLORS = [
   { bg: "bg-teal-100", text: "text-teal-700", border: "border-teal-400", gradient: "from-teal-500 to-teal-600" },
 ];
 
-function Dashboard() {
+function DashboardNew() {
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
@@ -50,8 +50,7 @@ function Dashboard() {
   const [editPhone, setEditPhone] = useState("");
   const [editSupervisor, setEditSupervisor] = useState("");
 
-  const headers = {};
-
+  
   const showMsg = (msg) => {
     setMessage(msg);
     setTimeout(() => setMessage(""), 3000);
@@ -86,7 +85,7 @@ function Dashboard() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${API}/students`, { name: newName, phone: newPhone, supervisor: newSupervisor }, { headers });
+      await axios.post(`${API}/students`, { name: newName, phone: newPhone, supervisor: newSupervisor });
       setNewName(""); setNewPhone(""); setNewSupervisor("");
       setShowAddStudent(false);
       showMsg("تمت إضافة الطالب بنجاح");
@@ -100,7 +99,7 @@ function Dashboard() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`${API}/students/${editStudent.id}`, { name: editName, phone: editPhone, supervisor: editSupervisor }, { headers });
+      await axios.put(`${API}/students/${editStudent.id}`, { name: editName, phone: editPhone, supervisor: editSupervisor });
       setEditStudent(null);
       showMsg("تم تحديث بيانات الطالب");
       await fetchStudents();
@@ -112,7 +111,7 @@ function Dashboard() {
   const deleteStudent = async (id) => {
     if (!window.confirm("هل أنت متأكد من حذف هذا الطالب؟")) return;
     try {
-      await axios.delete(`${API}/students/${id}`, { headers });
+      await axios.delete(`${API}/students/${id}`);
       showMsg("تم حذف الطالب");
       await fetchStudents();
     } catch {
@@ -123,7 +122,7 @@ function Dashboard() {
   const updatePoints = async (studentId, points, reason) => {
     setLoading(true);
     try {
-      await axios.put(`${API}/students/${studentId}/points`, { points, reason }, { headers });
+      await axios.put(`${API}/students/${studentId}/points`, { points, reason });
       showMsg(`تم ${points > 0 ? 'إضافة' : 'خصم'} ${Math.abs(points)} نقطة`);
       setSelectedStudent(null);
       await fetchStudents();
@@ -136,7 +135,7 @@ function Dashboard() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`${API}/students/bulk-points`, { group: bulkGroup, points: parseInt(bulkPoints), reason: bulkReason }, { headers });
+      await axios.put(`${API}/students/bulk-points`, { group: bulkGroup, points: parseInt(bulkPoints), reason: bulkReason });
       showMsg("تم تحديث نقاط المجموعة");
       setShowBulkPoints(false);
       setBulkGroup(""); setBulkPoints(""); setBulkReason("");
@@ -151,7 +150,7 @@ function Dashboard() {
     formData.append("file", file);
     try {
       await axios.post(`${API}/students/${studentId}/upload-image`, formData, {
-        headers: { ...headers, "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" }
       });
       showMsg("تم رفع الصورة");
       await fetchStudents();
@@ -184,17 +183,6 @@ function Dashboard() {
             </div>
             <div className="flex gap-2">
               <Link to="/challenges" className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="challenges-link">🏆 المنافسات</Link>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("ghiras_token");
-                  navigate("/login", { replace: true });
-                }}
-                className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold"
-                data-testid="logout-btn"
-                aria-label="تسجيل الخروج"
-              >
-                🔐
-              </button>
             </div>
           </div>
         </div>
