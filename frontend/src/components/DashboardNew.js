@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import PointsModal from "./PointsModal";
 import LeaderboardTicker from "./LeaderboardTicker";
@@ -21,6 +21,7 @@ const SUPERVISOR_COLORS = [
 ];
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -159,7 +160,7 @@ function Dashboard() {
   };
 
   const getColor = (index) => SUPERVISOR_COLORS[index % SUPERVISOR_COLORS.length];
-  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+  const PUBLIC_BASE_URL = window.location.origin;
 
   const sections = [
     { id: "groups", label: "المجموعات", icon: "🏅" },
@@ -182,6 +183,17 @@ function Dashboard() {
             </div>
             <div className="flex gap-2">
               <Link to="/challenges" className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold" data-testid="challenges-link">🏆 المنافسات</Link>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("ghiras_token");
+                  navigate("/login", { replace: true });
+                }}
+                className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold"
+                data-testid="logout-btn"
+                aria-label="تسجيل الخروج"
+              >
+                🔐
+              </button>
             </div>
           </div>
         </div>
@@ -415,7 +427,7 @@ function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {students.map(s => (
                 <div key={s.id} className="text-center border rounded-lg p-3">
-                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${BASE_URL}/public/${s.id}`)}`} alt="QR" className="mx-auto mb-2" />
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`${PUBLIC_BASE_URL}/public/${s.id}`)}`} alt="QR" className="mx-auto mb-2" />
                   <p className="text-sm font-semibold truncate">{s.name}</p>
                 </div>
               ))}

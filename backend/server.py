@@ -139,6 +139,7 @@ class Match(BaseModel):
     score1: Optional[int] = None
     score2: Optional[int] = None
     status: str = "scheduled"
+    played: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MatchCreate(BaseModel):
@@ -221,7 +222,18 @@ async def get_student_profile(student_id: str):
     student = await db.students.find_one({"id": student_id}, {"_id": 0})
     if not student:
         raise HTTPException(status_code=404, detail="غير موجود")
-    return student
+    students = await db.students.find({}, {"_id": 0}).to_list(1000)
+    students.sort(key=lambda x: x.get("points", 0), reverse=True)
+    rank = None
+    for i, s in enumerate(students):
+        if s.get("id") == student_id:
+            rank = i + 1
+            break
+    return {
+        "student": student,
+        "rank": rank,
+        "total_students": len(students)
+    }
 
 @api_router.put("/students/{student_id}")
 async def update_student(student_id: str, data: StudentUpdate):
@@ -443,6 +455,7 @@ async def get_matches():
     for m in matches:
         if isinstance(m.get("created_at"), str):
             m["created_at"] = datetime.fromisoformat(m["created_at"])
+        m["played"] = m.get("status") == "completed"
     return matches
 
 @api_router.post("/matches", response_model=Match)
@@ -483,25 +496,39 @@ async def get_league_standings():
         score2 = match.get("score2", 0)
         
         if team1 not in standings:
-            standings[team1] = {"wins": 0, "losses": 0, "draws": 0, "points": 0}
+            standings[team1] = {"team": team1, "played": 0, "won": 0, "lost": 0, "drawn": 0, "gf": 0, "ga": 0, "gd": 0, "points": 0}
         if team2 not in standings:
-            standings[team2] = {"wins": 0, "losses": 0, "draws": 0, "points": 0}
+            standings[team2] = {"team": team2, "played": 0, "won": 0, "lost": 0, "drawn": 0, "gf": 0, "ga": 0, "gd": 0, "points": 0}
+
+        standings[team1]["played"] += 1
+        standings[team2]["played"] += 1
+
+        standings[team1]["gf"] += score1
+        standings[team1]["ga"] += score2
+        standings[team2]["gf"] += score2
+        standings[team2]["ga"] += score1
         
         if score1 > score2:
-            standings[team1]["wins"] += 1
+            standings[team1]["won"] += 1
             standings[team1]["points"] += 3
-            standings[team2]["losses"] += 1
+            standings[team2]["lost"] += 1
         elif score2 > score1:
-            standings[team2]["wins"] += 1
+            standings[team2]["won"] += 1
             standings[team2]["points"] += 3
-            standings[team1]["losses"] += 1
+            standings[team1]["lost"] += 1
         else:
-            standings[team1]["draws"] += 1
+            standings[team1]["drawn"] += 1
             standings[team1]["points"] += 1
-            standings[team2]["draws"] += 1
+            standings[team2]["drawn"] += 1
             standings[team2]["points"] += 1
-    
-    return sorted(standings.items(), key=lambda x: x[1]["points"], reverse=True)
+
+    table = []
+    for team, row in standings.items():
+        row["gd"] = row["gf"] - row["ga"]
+        table.append(row)
+
+    table.sort(key=lambda x: x["points"], reverse=True)
+    return table
 
 @api_router.get("/league-star")
 async def get_league_star():
