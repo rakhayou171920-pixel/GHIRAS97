@@ -15,7 +15,7 @@ function LoginPage({ onLogin }) {
     setError("");
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/auth/login`, { username, password });
+      const res = await axios.post(`${API}/auth/login?t=${Date.now()}`, { username, password });
       localStorage.setItem("ghiras_token", res.data.token);
       onLogin(res.data.token);
     } catch (err) {
