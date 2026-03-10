@@ -9,7 +9,8 @@ import LeagueStarManager from "./LeagueStarManager";
 import ViewerLinksManager from "./ViewerLinksManager";
 import GroupsManager from "./GroupsManager";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const BACKEND_BASE = (process.env.REACT_APP_BACKEND_URL || "").replace(/\/+$/, "");
+const API = BACKEND_BASE.endsWith("/api") ? BACKEND_BASE : `${BACKEND_BASE}/api`;
 
 const SUPERVISOR_COLORS = [
   { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-400", gradient: "from-blue-500 to-blue-600" },
