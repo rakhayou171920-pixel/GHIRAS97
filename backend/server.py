@@ -193,10 +193,11 @@ class RamadanQuizAnswer(BaseModel):
 
 @api_router.post("/auth/login")
 async def login(req: LoginRequest):
+    print(f"[DEBUG] Login attempt: username={req.username}, password={req.password}")
     if req.username == ADMIN_USERNAME and req.password == ADMIN_PASSWORD:
         token = create_token(req.username)
         return {"token": token}
-    raise HTTPException(status_code=401, detail="بيانات غير صحيحة")
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
 # ==================== Student Endpoints ====================
 
