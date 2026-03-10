@@ -630,7 +630,7 @@ async def submit_quiz_answer(data: RamadanQuizAnswer):
 async def health_check():
     return {"status": "ok"}
 
-# ==================== App Setup ====================
+# ==================== App Setup ===== ===============
 
 app.include_router(api_router)
 
